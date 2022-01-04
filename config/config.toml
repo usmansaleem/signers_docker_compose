@@ -1,0 +1,25 @@
+logging="INFO"
+data-path="/opt/besu/data"
+host-allowlist=["*"]
+
+network="dev"
+miner-enabled=true
+miner-coinbase="fe3b557e8fb62b89f4916b721be55ceb828dbd73"
+
+# rpc
+rpc-http-enabled=true
+rpc-http-host="0.0.0.0"
+rpc-http-port=8545
+rpc-http-cors-origins=["*"]
+# rpc tls settings
+rpc-http-tls-enabled=true
+rpc-http-tls-client-auth-enabled=true
+rpc-http-tls-keystore-file="/var/config/tls/keystore.p12"
+rpc-http-tls-keystore-password-file="/var/config/tls/password.txt"
+rpc-http-tls-known-clients-file="/var/config/tls/knownClients.txt"
+
+# ws
+rpc-ws-enabled=true
+rpc-ws-host="0.0.0.0"
+rpc-ws-port=8546
+

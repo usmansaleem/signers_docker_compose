@@ -1,0 +1,12 @@
+version: "3.9"
+   
+services:
+  besu:
+    image: hyperledger/besu:latest
+    command: --config-file=/var/config/config.toml
+    volumes:
+      - ./config:/var/config
+      - ./data:/opt/besu/data
+    ports:
+      - "8545:8545"
+      - "8546:8546"
