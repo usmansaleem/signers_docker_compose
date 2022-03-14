@@ -1,0 +1,4 @@
+[signing]
+type="file-based-signer"
+key-file="/var/config/keys/UTC--2022-03-14T00-19-12.873926000Z--9640ee8fbe7d83aa304bd5187aefb764f306ac71.json"
+password-file="/var/config/keys/9640ee8fbe7d83aa304bd5187aefb764f306ac71.password"
