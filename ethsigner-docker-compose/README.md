@@ -11,6 +11,12 @@ curl --cacert ./client1/ethsigner.pem --cert-type P12 --cert ./client1/client1_k
  https://localhost:8545/upcheck
 ~~~
 
+List Accounts:
+~~~
+curl --cacert ./client1/ethsigner.pem --cert-type P12 --cert ./client1/client1_keystore.p12:changeit \
+ -X POST --data '{"jsonrpc":"2.0","method":"eth_accounts","params":[],"id":1}' https://127.0.0.1:8545
+~~~
+
 ## Steps to create self signed certificate both for EthSigner and the client
 
 1. Create EthSigner keystore
