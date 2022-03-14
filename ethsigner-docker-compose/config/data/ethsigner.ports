@@ -1,3 +1,0 @@
-#This file contains the ports used by the running instance of Web3Provider. This file will be deleted after the node is shutdown.
-#Mon Mar 14 00:47:59 GMT 2022
-http-jsonrpc=8545
