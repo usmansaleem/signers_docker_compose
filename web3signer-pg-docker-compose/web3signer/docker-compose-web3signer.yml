@@ -1,0 +1,15 @@
+version: "3.9"
+   
+services:
+  web3signer:
+    image: consensys/web3signer:develop
+    command: --config-file=/var/config/config.yaml eth2
+    volumes:
+      - ./config:/var/config
+    ports:
+      - "9000:9000"
+    networks:
+      - testnet
+networks:
+  testnet:
+    name: test_w3s_network

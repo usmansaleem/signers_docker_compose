@@ -1,0 +1,13 @@
+http-listen-host: "0.0.0.0"
+http-listen-port: 9000
+http-host-allowlist: "*"
+
+key-store-path: /var/config/keys
+
+# eth2 subcommand options
+# eth2.network: file:///var/config/e2e_config.yaml
+eth2.slashing-protection-enabled: true
+eth2.slashing-protection-db-username: postgres
+eth2.slashing-protection-db-password: postgres
+eth2.slashing-protection-db-url: "jdbc:postgresql://db/web3signer"
+

@@ -1,0 +1,37 @@
+version: '3.8'
+services:
+  web3signer_migrations:
+    image: consensys/web3signer:develop
+    volumes:
+      - ./migrations:/flyway/sql
+    entrypoint: ["sh", "-c", "rm /flyway/sql/*.sql; cp /opt/web3signer/migrations/postgresql/*.sql /flyway/sql/; echo 'sql files copied!'"] 
+  db:
+    image: postgres:14.1-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=web3signer
+    ports:
+      - '5432:5432'
+    networks:
+      - testnet
+    volumes: 
+      - dbdata:/var/lib/postgresql/data
+    depends_on:
+      - web3signer_migrations
+  flyway:
+    image: flyway/flyway
+    command: -url=jdbc:postgresql://db/web3signer -user=postgres -password=postgres -connectRetries=60 migrate
+    volumes:
+      - ./migrations:/flyway/sql:ro
+    depends_on:
+      - db
+      - web3signer_migrations
+    networks:
+      - testnet
+volumes:
+  dbdata:
+networks:
+  testnet:
+    name: test_w3s_network
