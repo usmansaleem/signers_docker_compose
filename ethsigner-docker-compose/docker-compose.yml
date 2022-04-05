@@ -8,3 +8,4 @@ services:
       - ./config:/var/config
     ports:
       - "8545:8545"
+      - "9546:9546"

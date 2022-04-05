@@ -13,6 +13,10 @@ downstream-http-port=8546
 # CORS
 http-cors-origins="*"
 
+# Metrics
+metrics-enabled=true
+metrics-port=9546
+
 # Signing options
 
 # multi-key
