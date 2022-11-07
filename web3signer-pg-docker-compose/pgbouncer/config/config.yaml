@@ -13,4 +13,5 @@ eth2.slashing-protection-db-password: postgres
 #eth2.slashing-protection-db-url: "jdbc:postgresql://db:5431/web3signer"
 # Enable to test pgbouncer based connections
 eth2.slashing-protection-db-url: "jdbc:postgresql://pgbouncer:5432/web3signer"
+eth2.slashing-protection-db-connection-pool-enabled: false
 
