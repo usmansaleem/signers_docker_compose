@@ -1,10 +1,10 @@
-## Run PostgreSQL and perform slashing protection schema migration
+## Copy sql migration files, run PostgreSQL, perform slashing protection schema migration and
+## start Web3Signer
 `cd pg;docker-compose -f ./docker-compose-pg.yml up`
 
-## Run Web3Signer with slashing protection enabled
-`cd web3signer;docker-compose -f ./docker-compose-web3signer.yml up`
+## Stop container (from another terminal window)
+`cd pg;docker-compose -f ./docker-compose-web3signer.yml stop`
 
-## Stop or shutdown containers completely:
-docker-compose -f ./docker-compose-web3signer.yml stop | down -v
-docker-compose -f ./docker-compose-pg.yml [stop | down -v]
+## Shutdown container completely and deleting all db volumes (from another terminal window)
+`cd pg;docker-compose -f ./docker-compose-pg.yml down -v`
 
