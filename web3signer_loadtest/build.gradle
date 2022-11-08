@@ -1,0 +1,14 @@
+plugins {
+    id 'io.gatling.gradle' version '3.6.1'
+}
+
+gatling {
+  logLevel = 'INFO' // logback root level
+  logHttp = 'ALL' // set to 'ALL' for all HTTP traffic in TRACE, 'FAILURES' for failed HTTP traffic in DEBUG
+}
+
+/* maven central is added by default, uncomment and add more custom repositories
+repositories {
+    mavenCentral()
+}
+*/
