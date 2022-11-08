@@ -2,20 +2,20 @@ version: '3.8'
 
 services:
   web3signer_migrations:
-    image: docker.io/consensys/web3signer:develop
+    image: "docker.io/consensys/web3signer:${WEB3SIGNER_TAG:-develop}"
     volumes:
       - ./migrations:/flyway/sql
     entrypoint: ["sh", "-c", "rm /flyway/sql/*.sql; cp /opt/web3signer/migrations/postgresql/*.sql /flyway/sql/; echo 'sql files copied!'"] 
 
   db:
-    image: docker.io/bitnami/postgresql:14
+    image: "docker.io/bitnami/postgresql:${PG_TAG:-14}"
     restart: always
     environment:
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=web3signer
-      - POSTGRES_PORT_NUMBER=5431  
+      - POSTGRESQL_PASSWORD=postgres
+      - POSTGRESQL_DATABASE=web3signer
+      - POSTGRESQL_PORT_NUMBER=5431  
     ports:
-      - '5431'
+      - '5431:5431'
     networks:
       - testnet
     volumes: 
@@ -25,7 +25,7 @@ services:
         condition: service_completed_successfully
 
   pgbouncer:
-    image: docker.io/bitnami/pgbouncer:1
+    image: "docker.io/bitnami/pgbouncer:${PG_BOUNCER_TAG:-1}"
     environment:
       - POSTGRESQL_HOST=db
       - POSTGRESQL_USER=postgres
@@ -47,7 +47,7 @@ services:
       - testnet
 
   flyway:
-    image: flyway/flyway
+    image: "docker.io/flyway/flyway:${FLYWAY_TAG:-latest}"
     command: -url=jdbc:postgresql://pgbouncer:5432/web3signer -user=postgres -password=postgres -connectRetries=60 migrate
     volumes:
       - ./migrations:/flyway/sql:ro
@@ -63,7 +63,7 @@ services:
 
 
   web3signer:
-    image: consensys/web3signer:develop
+    image: "docker.io/consensys/web3signer:${WEB3SIGNER_TAG:-develop}"
     command: --config-file=/var/config/config.yaml eth2
     volumes:
       - ./config:/var/config
