@@ -7,12 +7,23 @@ docker compose up
 ```
 
 ## Generate Hashicorp configuration for Web3Signer if required.
+
 ### Convert server cert to PKCS12 truststore
 ```
 keytool -import -trustcacerts -alias vault_ca \
 -file ./vault/certs/server.crt -keystore ./vault/certs/truststore.p12 \
 -storepass test123 -noprompt
 ```
+
+### Generate knownhosts file
+```
+echo "$(openssl x509 -in ./vault/certs/server.crt -noout -subject -sha256 \
+| sed -n 's/^subject.*CN=\([^/]*\).*$/\1/p') \
+$(openssl x509 -in ./vault/certs/server.crt -noout -sha256 -fingerprint \
+| sed -n 's/^SHA256 Fingerprint=\([0-9A-F:]*\).*$/\1/p')" \
+> ./web3signer/config/knownhosts
+```
+
 ### Generate random keys and import it in Hashicorp
 
 ```
