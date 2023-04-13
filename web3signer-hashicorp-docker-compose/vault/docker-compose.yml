@@ -1,13 +1,6 @@
 version: '3.9'
 services:
-#  ssl-certificate:
-#    image: ubuntu:latest
-#    container_name: 'ssl-certificate'
-#    command: bash -c "if [ ! -f /certs/server.crt ]; then echo 'Generating SSL certificates...' && apt-get -qq update && apt-get install -y -q openssl && openssl req -x509 -nodes -days 36500 -newkey rsa:2048 -keyout /certs/server.key -out /certs/server.crt -subj '/CN=localhost' -extensions SAN -config <(echo '[req]'; echo 'default_bits = 2048'; echo 'prompt = no'; echo 'default_md = sha256'; echo 'req_extensions = SAN'; echo '[SAN]'; echo 'subjectAltName=DNS:localhost,IP:127.0.0.1'); else echo 'SSL certificate already exists'; fi"
-#    volumes:
-#      - ./certs:/certs
-  
-  ssl-certificate:
+  vault-ssl-certificate:
     image: alpine:latest
     container_name: 'ssl-certificate'
     command: >
@@ -22,7 +15,7 @@ services:
   
   vault:
     image: hashicorp/vault:latest
-    container_name: 'hashicorp-vault-inmem-tls'
+    container_name: 'hashicorp-vault-tls'
     command: server -config /config
     ports:
       - "8200:8200"
@@ -36,7 +29,7 @@ services:
     cap_add:
       - IPC_LOCK
     depends_on:
-      ssl-certificate:
+      vault-ssl-certificate:
         condition: service_completed_successfully
   
   init-vault:
