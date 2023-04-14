@@ -34,8 +34,8 @@ INIT_OUT=$(curl -s -k -X POST \
 VAULT_TOKEN=$(echo $INIT_OUT | jq --raw-output '.root_token')
 VAULT_KEY=$(echo $INIT_OUT | jq --raw-output '.keys_base64[0]')
 
-echo "$VAULT_TOKEN" > /creds/vault.token
-echo "$VAULT_KEY" > /creds/vault.unseal
+echo -n "$VAULT_TOKEN" > /creds/vault.token
+echo -n "$VAULT_KEY" > /creds/vault.unseal
 
 echo "Unsealing Hashicorp Vault ..."
 curl -s -k -X POST -d "{\"key\": \"$VAULT_KEY\"}" "$VAULT_HOST/sys/unseal" | jq

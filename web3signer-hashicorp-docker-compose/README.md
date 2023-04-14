@@ -1,4 +1,4 @@
-# Web3Signer docker compose
+# Web3Signer/Hashicorp docker compose
 
 - Make sure Hashicorp docker compose is up (using different terminal window)
 ```
@@ -8,31 +8,16 @@ docker compose up
 
 ## Generate Hashicorp configuration for Web3Signer if required.
 
-### Generate knownhosts file
-```
-echo "$(openssl x509 -in ./vault/certs/server.crt -noout -subject -sha256 \
-| sed -n 's/^subject.*CN=\([^/]*\).*$/\1/p') \
-$(openssl x509 -in ./vault/certs/server.crt -noout -sha256 -fingerprint \
-| sed -n 's/^SHA256 Fingerprint=\([0-9A-F:]*\).*$/\1/p')" \
-> ./web3signer/config/knownhosts
-```
-
-### Convert server cert to PKCS12 truststore
-```
-keytool -import -trustcacerts -alias vault_ca \
--file ./vault/certs/server.crt -keystore ./vault/certs/truststore.p12 \
--storepass test123 -noprompt
-```
-
-### Generate 10000 random keys and import it in Hashicorp
+Use following commands to generate n random BLS keys, import it in Hashicorp and generate Web3Signer configuration files.
+The config files will be generated in `web3signer/config/keys`
 
 ```
 git submodule update --init --recursive
-cd signer-configuration-generator
-./gradlew clean build installdist
-cd ./build/install/signer-configuration-generator/bin
-JAVA_OPTS="-Djavax.net.ssl.trustStore=../../../../../vault/certs/truststore.p12 -Djavax.net.ssl.trustStorePassword=test123" \
-./signer-configuration-generator hashicorp --token=$(cat ../../../../../vault/creds/vault.token) \
---count=10000 --output=../../../../../web3signer/config/keys/ --url https://localhost:8200/v1/secret
+./scripts/gen-keys.sh 1000
+```
 
+## Run Web3Signer
+```
+cd ./web3signer
+docker compose up
 ```

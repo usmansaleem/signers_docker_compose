@@ -15,4 +15,4 @@ echo "Generating truststore ..."
 openssl pkcs12 -export -in /certs/server.crt -inkey /certs/server.key -out /certs/truststore.p12 -passout pass:test123
 echo "Generating knownhosts file ..."
 openssl x509 -in /certs/server.crt -noout -sha256 -fingerprint | awk -F= '{print $2}' | tr -d ': ' 
-echo "vault $(openssl x509 -in /certs/server.crt -noout -sha256 -fingerprint | awk -F= '{print $2}' | tr -d ': ')" > /certs/knownhosts
+echo "vault:8200 $(openssl x509 -in /certs/server.crt -noout -sha256 -fingerprint | awk -F= '{print $2}' | tr -d ': ')" > /certs/knownhosts
