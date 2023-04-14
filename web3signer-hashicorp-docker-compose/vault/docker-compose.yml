@@ -1,17 +1,17 @@
 version: '3.9'
+
+networks:
+  internal_network:
+    name: 'web3signer_hashicorp_tls_network'
+
 services:
   vault-ssl-certificate:
     image: alpine:latest
     container_name: 'ssl-certificate'
-    command: >
-      sh -c "if [ ! -f /certs/server.crt ]; then
-       echo 'Generating SSL certificates...' && apk update && apk add openssl && rm -rf /var/cache/apk/* &&
-       openssl req -x509 -newkey rsa:2048 -nodes -days 36500 -keyout /certs/server.key -out /certs/server.crt -subj '/CN=localhost' -addext 'subjectAltName = DNS:localhost,IP:127.0.0.1'
-       else
-       echo 'SSL certificate already exists'
-       fi"
+    command: sh -c /scripts/gen-cert.sh
     volumes:
       - ./certs:/certs
+      - ./scripts:/scripts
   
   vault:
     image: hashicorp/vault:latest
@@ -31,6 +31,8 @@ services:
     depends_on:
       vault-ssl-certificate:
         condition: service_completed_successfully
+    networks:
+      - internal_network
   
   init-vault:
     image: usmans/init-vault
@@ -43,3 +45,5 @@ services:
       vault:
         condition: service_started
     command: https://vault:8200
+    networks:
+      - internal_network
