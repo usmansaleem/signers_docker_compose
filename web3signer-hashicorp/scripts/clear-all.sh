@@ -15,12 +15,20 @@ docker compose down --rmi all
 popd
 
 echo "Vault: Removing data ..."
-rm -rf $SCRIPT_DIR/../vault/data/.
+rm -rf $SCRIPT_DIR/../vault/data/core
+rm -rf $SCRIPT_DIR/../vault/data/logical
+rm -rf $SCRIPT_DIR/../vault/data/sys
 echo "Vault: Removing certs ..."
-rm -rf $SCRIPT_DIR/../vault/certs/.
+rm -f $SCRIPT_DIR/../vault/certs/knownhosts
+rm -f $SCRIPT_DIR/../vault/certs/server.crt
+rm -f $SCRIPT_DIR/../vault/certs/server.key
+rm -f $SCRIPT_DIR/../vault/certs/truststore.p12
+
 echo "Vault: Removing creds ..."
-rm -rf $SCRIPT_DIR/../vault/creds/.
+rm -f $SCRIPT_DIR/../vault/creds/vault.token
+rm -f $SCRIPT_DIR/../vault/creds/vault.unseal
+
 echo "Web3Signer: Removing configuration files ..."
-rm -rf $SCRIPT_DIR/../web3signer/config/keys/
+rm -rf $SCRIPT_DIR/../web3signer/config/keys
 echo "Web3Signer: Removing knownhosts file ..."
-rm -fv $SCRIPT_DIR/../web3signer/config/knownhosts
+rm -f $SCRIPT_DIR/../web3signer/config/knownhosts

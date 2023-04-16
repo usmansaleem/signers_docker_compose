@@ -12,6 +12,8 @@ services:
     volumes:
       - ./certs:/certs
       - ./scripts:/scripts
+    networks:
+      - internal_network
   
   vault:
     image: hashicorp/vault:latest
@@ -26,6 +28,10 @@ services:
     environment:
       - 'VAULT_SKIP_VERIFY=true'
       - 'VAULT_ENABLE_FILE_PERMISSIONS_CHECK=false'
+    healthcheck:
+      test: ["CMD-SHELL", "curl -k --fail https://localhost:8200/v1/sys/health?sealedcode=200&uninitcode=200"]
+      interval: 3s
+      retries: 3
     cap_add:
       - IPC_LOCK
     depends_on:
@@ -43,7 +49,7 @@ services:
       - ./creds:/creds
     depends_on:
       vault:
-        condition: service_started
+        condition: service_healthy
     command: https://vault:8200
     networks:
       - internal_network
