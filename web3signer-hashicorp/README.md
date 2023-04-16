@@ -1,6 +1,6 @@
 # Web3Signer/Hashicorp docker compose
 
-- Make sure Hashicorp docker compose is up (using different terminal window)
+- Make sure Hashicorp docker compose is up (using different terminal window). See [README]{./vault/README.md} for more details.
 ```
 cd ./vault
 docker compose up
@@ -8,8 +8,8 @@ docker compose up
 
 ## Generate Hashicorp configuration for Web3Signer if required.
 
-Use following commands to generate `n` random BLS keys, import it in Hashicorp and generate Web3Signer configuration files.
-The config files will be generated in `web3signer/config/keys`
+Assuming that vault is up and running and listening on port 8200 using above docker compose file, use following commands to generate `n`
+random BLS keys, import it in Hashicorp and generate Web3Signer configuration files. The config files will be generated in `web3signer/config/keys`
 
 ```
 git submodule update --init --recursive
@@ -25,5 +25,5 @@ docker compose up
 ```
 
 ## Clean up
-`CTRL+C` followed by `docker compose down --rmi all`.
-To remove generated keys, hashicorp cert, data, cred etc. run `./scripts/clear-all.sh`
+- In vault and web3signer terminal windows, `CTRL+C` and/or `docker compose down`.
+- To remove docker images, generated keys, hashicorp cert, data, cred, configuration files. run `./scripts/clear-all.sh`
