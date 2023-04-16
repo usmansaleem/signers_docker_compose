@@ -7,7 +7,7 @@ networks:
 services:
   vault-ssl-certificate:
     image: alpine:latest
-    container_name: 'ssl-certificate'
+    container_name: 'ws-vault-ssl-certificate'
     command: sh -c /scripts/gen-cert.sh
     volumes:
       - ./certs:/certs
@@ -15,7 +15,7 @@ services:
   
   vault:
     image: hashicorp/vault:latest
-    container_name: 'hashicorp-vault-tls'
+    container_name: 'ws-vault-tls'
     command: server -config /config
     ports:
       - "8200:8200"
@@ -38,7 +38,7 @@ services:
     image: usmans/init-vault
     build:
       context: ./initvault
-    container_name: "init-vault"
+    container_name: "ws-vault-init"
     volumes:
       - ./creds:/creds
     depends_on:
