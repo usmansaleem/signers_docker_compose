@@ -1,6 +1,6 @@
 # Web3Signer/Hashicorp docker compose
 
-- Make sure Hashicorp docker compose is up (using different terminal window). See [README]{./vault/README.md} for more details.
+- Make sure Hashicorp docker compose is up (using different terminal window). See [README](./vault/README.md) for more details.
 ```
 cd ./vault
 docker compose up
