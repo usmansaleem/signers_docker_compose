@@ -7,7 +7,7 @@ metrics-host: "0.0.0.0"
 metrics-port: 9001
 metrics-host-allowlist: "*"
 
-logging: "INFO"
+logging: "DEBUG"
 
 key-store-path: /var/config/keys
 

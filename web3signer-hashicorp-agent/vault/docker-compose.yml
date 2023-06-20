@@ -9,8 +9,6 @@ services:
     image: hashicorp/vault:latest
     container_name: 'ws-vault-plain'
     command: server -config /config
-    ports:
-      - "8200:8200"
     volumes:
       - "./data:/data"
       - "./config:/config"
@@ -23,6 +21,26 @@ services:
       retries: 3
     cap_add:
       - IPC_LOCK
+    networks:
+      - internal_network
+
+  vault-agent:
+    image: hashicorp/vault:latest
+    container_name: 'ws-vault-agent-plain'
+    command: agent -config /config
+    ports:
+      - "8200:8200"
+    volumes:
+      - "./vault-agent-config:/config"
+      - ./creds:/creds
+    environment:
+      - 'VAULT_SKIP_VERIFY=true'
+      - 'VAULT_ENABLE_FILE_PERMISSIONS_CHECK=false'
+      - 'VAULT_ADDR=http://vault:8200'
+    entrypoint: "vault agent -config /config/ -log-level debug"
+    depends_on:
+      init-vault:
+        condition: service_completed_successfully
     networks:
       - internal_network
   

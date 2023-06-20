@@ -10,7 +10,7 @@ fi
 
 SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
 
-pushd $SCRIPT_DIR/../signer-configuration-generator
+pushd $SCRIPT_DIR/../../signer-configuration-generator
 
 ./gradlew installdist
 export JAVA_OPTS="-Djavax.net.ssl.trustStore=$SCRIPT_DIR/../vault/certs/truststore.p12 -Djavax.net.ssl.trustStorePassword=test123"
