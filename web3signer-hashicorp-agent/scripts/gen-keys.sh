@@ -14,6 +14,7 @@ SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
 
 pushd $SCRIPT_DIR/../../signer-configuration-generator
 
+./gradlew clean
 ./gradlew installdist
 ./build/install/signer-configuration-generator/bin/signer-configuration-generator hashicorp \
 --token-file="$SCRIPT_DIR/dummy.token" --count="$1" --output="$SCRIPT_DIR/../web3signer/config/keys" \
