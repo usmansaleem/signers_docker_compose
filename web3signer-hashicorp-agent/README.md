@@ -13,7 +13,7 @@ random BLS keys, import it in Hashicorp and generate Web3Signer configuration fi
 
 ```
 git submodule update --init --recursive
-./scripts/gen-keys.sh 20000
+./scripts/gen-keys.sh 5
 ```
 
 ## Run Web3Signer
