@@ -1,5 +1,7 @@
 # Web3Signer/Hashicorp docker compose
 
+Docker compose example showcase Web3Signer and Hashicorp Vault integration with TLS enabled.
+
 - Make sure Hashicorp docker compose is up (using different terminal window). See [README](./vault/README.md) for more details.
 ```
 cd ./vault
@@ -8,16 +10,21 @@ docker compose up
 
 ## Generate Hashicorp configuration for Web3Signer if required.
 
-Assuming that vault is up and running and listening on port 8200 using above docker compose file, use following commands to generate `n`
+Assuming that vault is up and running using above `docker compose up` command, use following commands to generate 5
 random BLS keys, import it in Hashicorp and generate Web3Signer configuration files. The config files will be generated in `web3signer/config/keys`
 
 ```
-git submodule update --init --recursive
-./scripts/gen-keys.sh 20000
+cd ./gen-keys
+docker compose up
+```
+
+To change the number of keys to generate, use following variant instead:
+```
+KEYS_COUNT=10 docker compose up
 ```
 
 ## Run Web3Signer
-Assuming that the above step is performed to generate configuration files and vault docker compose is up.
+Assuming that vault docker compose is up and gen-keys docker compose has been executed successfully
 
 ```
 cd ./web3signer

@@ -14,6 +14,11 @@ pushd $SCRIPT_DIR/../web3signer
 docker compose down --rmi all
 popd
 
+echo "Gen Keys: compose down ..."
+pushd $SCRIPT_DIR/../gen-keys
+docker compose down --rmi all
+popd
+
 echo "Vault: Removing data ..."
 rm -rf $SCRIPT_DIR/../vault/data/core
 rm -rf $SCRIPT_DIR/../vault/data/logical
