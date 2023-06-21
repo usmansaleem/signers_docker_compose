@@ -1,0 +1,30 @@
+version: "3.9"
+
+networks:
+  internal_network:
+    name: '${INTERNAL_NETWORK_NAME}'
+
+services:
+  w3s-conf-gen:
+    image: usmans/w3s-conf-gen:1.0.0
+    container_name: 'w3s-conf-gen'
+    environment:
+      - "JAVA_OPTS=-Djavax.net.ssl.trustStore=/certs/truststore.p12 -Djavax.net.ssl.trustStorePassword=test123"
+    command:
+      - hashicorp
+      - --token-file
+      - /creds/vault.token
+      - --count
+      - ${KEYS_COUNT}
+      - --output
+      - /config/keys
+      - --tls-knownhosts-file
+      - /config/knownhosts
+      - --url
+      - https://vault:8200/v1/secret
+    volumes:
+      - ../vault/creds:/creds/:ro
+      - ../vault/certs:/certs/:ro
+      - ../web3signer/config:/config
+    networks:
+      - internal_network

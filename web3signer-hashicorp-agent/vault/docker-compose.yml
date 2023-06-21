@@ -28,8 +28,6 @@ services:
     image: hashicorp/vault:latest
     container_name: 'ws-vault-agent-plain'
     command: agent -config /config
-    ports:
-      - "8200:8200"
     volumes:
       - "./vault-agent-config:/config"
       - ./creds:/creds
