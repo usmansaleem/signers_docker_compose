@@ -1,0 +1,18 @@
+# Generic configuration before subcommand
+key-store-path: /var/config/keystores
+logging: "DEBUG"
+
+# eth1 subcommand configuration
+eth1.chain-id: 1337
+
+eth1.aws-kms-enabled: "true"
+# Localstack (AWS KMS simulation) specific configuration (See compose.yaml)
+eth1.aws-endpoint-override: "http://localstack:4566"
+eth1.aws-kms-auth-mode: "SPECIFIED"
+eth1.aws-kms-access-key-id: "test1"
+eth1.aws-kms-secret-access-key: "test1"
+eth1.aws-kms-region: "us-east-2"
+# Modify following to test different KMS keys
+eth1.aws-kms-tag-names-filter: ["Org1","Section"]
+eth1.aws-kms-tag-values-filter: ["US","QA"]
+

@@ -1,0 +1,36 @@
+services:
+    web3signer:
+        container_name: "ws-web3signer-eth1"
+        image: "docker.io/consensys/web3signer:latest"
+        command: --config-file=/var/config/config.yaml eth1
+        volumes:
+        - ./config:/var/config
+        ports:
+        - "9000:9000"
+        networks:
+        - w3s-eth1
+        depends_on:
+          localstack:
+            condition: service_healthy
+    localstack:
+        container_name: "ws-localstack-eth1"
+        image: "docker.io/localstack/localstack"
+        ports:
+          - "127.0.0.1:4566:4566"            # LocalStack Gateway
+          - "127.0.0.1:4510-4559:4510-4559"  # external services port range
+        environment:
+          - SERVICES=kms
+          - EAGER_SERVICE_LOADING=1
+          - AWS_ACCESS_KEY_ID=test1
+          - AWS_SECRET_ACCESS_KEY=test1
+          - AWS_DEFAULT_REGION=us-east-2
+          - AWS_SESSION_TOKEN=test1
+        volumes:
+          - "./localstack-volume:/var/lib/localstack"
+          - "./localstack-init-scripts:/etc/localstack/init/ready.d"
+          - "/var/run/docker.sock:/var/run/docker.sock" # May not work on Mac/Windows?
+        networks:
+        - w3s-eth1
+
+networks:
+  w3s-eth1: {}
