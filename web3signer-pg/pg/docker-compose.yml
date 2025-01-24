@@ -1,8 +1,6 @@
-version: '3.8'
-
 services:
   web3signer_migrations:
-    image: "docker.io/consensys/web3signer:${WEB3SIGNER_TAG:-develop}"
+    image: "consensys/web3signer:${WEB3SIGNER_TAG:-develop}"
     volumes:
       - ./migrations:/flyway/sql
     entrypoint: ["sh", "-c", "rm /flyway/sql/*.sql; cp /opt/web3signer/migrations/postgresql/*.sql /flyway/sql/; echo 'sql files copied!'"] 
@@ -38,10 +36,11 @@ services:
       - testnet
 
   web3signer:
-    image: "docker.io/consensys/web3signer:${WEB3SIGNER_TAG:-develop}"
+    image: "consensys/web3signer:${WEB3SIGNER_TAG:-develop}"
     command: --config-file=/var/config/config.yaml eth2
     volumes:
       - ./config:/var/config
+    cpu_count: 4
     ports:
       - "9000:9000"
     networks:
