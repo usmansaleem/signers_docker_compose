@@ -8,3 +8,13 @@ eth1.aws-kms-tag-names-filter: ["Org1"]
 eth1.aws-kms-tag-values-filter: ["QA"]
 ``` 
 - Run `docker compose up` to start a Web3Signer instance with KMS using localstack setup in eth1 mode.
+
+## Signing Test
+
+To test the `/api/v1/eth1/sign/` using the first available public key:
+
+```sh
+cd ./signing-test
+npm install
+node test.js
+```

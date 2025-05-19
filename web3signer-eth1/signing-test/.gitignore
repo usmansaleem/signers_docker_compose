@@ -1,0 +1,27 @@
+# Node modules (huge and rebuilt via package.json)
+node_modules/
+
+# Environment variables (secrets, API keys, local overrides)
+.env
+.env.*.local
+
+# Build output (if you're transpiling or bundling)
+dist/
+build/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Coverage reports
+coverage/
+
+# OS- or editor-specific files
+.DS_Store
+Thumbs.db
+
+# IDE settings
+.vscode/
+.idea/

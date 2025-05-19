@@ -13,6 +13,5 @@ eth1.aws-kms-access-key-id: "test1"
 eth1.aws-kms-secret-access-key: "test1"
 eth1.aws-kms-region: "us-east-2"
 # Modify following to test different KMS keys
-eth1.aws-kms-tag-names-filter: ["Org1","Section"]
-eth1.aws-kms-tag-values-filter: ["US","QA"]
+#eth1.aws-kms-tag: "Org1=US"
 
