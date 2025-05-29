@@ -1,39 +1,74 @@
-#! /bin/sh
+#!/bin/bash
 
-set -e
+set -euo pipefail
 
-SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+declare -a services=("vault" "web3signer" "gen-keys")
 
-echo "Vault: Docker compose down ..."
-pushd $SCRIPT_DIR/../vault
-docker compose down --rmi all
-popd
+clean_docker() {
+    local service="$1"
+    echo "Cleaning Docker resources for ${service}..."
+    if [ -d "${SCRIPT_DIR}/../${service}" ]; then
+        pushd "${SCRIPT_DIR}/../${service}" >/dev/null
+        docker compose down --rmi all -v || {
+            echo "Warning: Failed to clean ${service} Docker resources"
+            popd >/dev/null
+            return 1
+        }
+        popd >/dev/null
+    else
+        echo "Warning: ${service} directory not found"
+    fi
+}
 
-echo "Vault: Web3Signer compose down ..."
-pushd $SCRIPT_DIR/../web3signer
-docker compose down --rmi all
-popd
+clean_files() {
+    local paths=("$@")
+    for path in "${paths[@]}"; do
+        if [ -e "${path}" ]; then
+            echo "Removing ${path}..."
+            rm -rf "${path}"
+        else
+            echo "Not found (skipping): ${path}"
+        fi
+    done
+}
 
-echo "Gen Keys: compose down ..."
-pushd $SCRIPT_DIR/../gen-keys
-docker compose down --rmi all
-popd
+main() {
+    # Clean Docker resources
+    for service in "${services[@]}"; do
+        clean_docker "${service}"
+    done
 
-echo "Vault: Removing data ..."
-rm -rf $SCRIPT_DIR/../vault/data/core
-rm -rf $SCRIPT_DIR/../vault/data/logical
-rm -rf $SCRIPT_DIR/../vault/data/sys
-echo "Vault: Removing certs ..."
-rm -f $SCRIPT_DIR/../vault/certs/knownhosts
-rm -f $SCRIPT_DIR/../vault/certs/server.crt
-rm -f $SCRIPT_DIR/../vault/certs/server.key
-rm -f $SCRIPT_DIR/../vault/certs/truststore.p12
+    # Vault files cleanup
+    local vault_data=(
+        "${SCRIPT_DIR}/../vault/data/core"
+        "${SCRIPT_DIR}/../vault/data/logical"
+        "${SCRIPT_DIR}/../vault/data/sys"
+    )
 
-echo "Vault: Removing creds ..."
-rm -f $SCRIPT_DIR/../vault/creds/vault.token
-rm -f $SCRIPT_DIR/../vault/creds/vault.unseal
+    local vault_certs=(
+        "${SCRIPT_DIR}/../vault/certs/knownhosts"
+        "${SCRIPT_DIR}/../vault/certs/server.crt"
+        "${SCRIPT_DIR}/../vault/certs/server.key"
+        "${SCRIPT_DIR}/../vault/certs/truststore.p12"
+    )
 
-echo "Web3Signer: Removing configuration files ..."
-rm -rf $SCRIPT_DIR/../web3signer/config/keys
-echo "Web3Signer: Removing knownhosts file ..."
-rm -f $SCRIPT_DIR/../web3signer/config/knownhosts
+    local vault_creds=(
+        "${SCRIPT_DIR}/../vault/creds/vault.token"
+        "${SCRIPT_DIR}/../vault/creds/vault.unseal"
+    )
+
+    local web3signer_files=(
+        "${SCRIPT_DIR}/../web3signer/config/keys"
+        "${SCRIPT_DIR}/../web3signer/config/knownhosts"
+    )
+
+    clean_files "${vault_data[@]}"
+    clean_files "${vault_certs[@]}"
+    clean_files "${vault_creds[@]}"
+    clean_files "${web3signer_files[@]}"
+
+    echo "Cleanup completed successfully"
+}
+
+main "$@"

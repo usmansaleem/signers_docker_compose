@@ -1,5 +1,3 @@
-version: "3.9"
-
 networks:
   internal_network:
     name: '${INTERNAL_NETWORK_NAME}'
