@@ -3,7 +3,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-declare -a services=("vault" "web3signer" "gen-keys")
+declare -a services=("web3signer" "gen-keys" "vault")
 
 clean_docker() {
     local service="$1"

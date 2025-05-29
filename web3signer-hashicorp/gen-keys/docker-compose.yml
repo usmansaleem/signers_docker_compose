@@ -14,7 +14,7 @@ services:
       "--token-file", "/creds/vault.token",
       "--count", "${KEYS_COUNT:-50}",
       "--output", "/config/keys",
-      "--tls-knownhosts-file", "/config/knownhosts",
+      "--tls-knownhosts-file", "/var/config/knownhosts",
       "--url", "${VAULT_URL:-https://vault:8200/v1/secret}"
     ]
     volumes:
