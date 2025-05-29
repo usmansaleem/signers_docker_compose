@@ -1,6 +1,7 @@
 networks:
   internal_network:
     name: 'web3signer_hashicorp_tls_network'
+    # NOT external - created by this compose file
 
 services:
   vault-ssl-certificate:

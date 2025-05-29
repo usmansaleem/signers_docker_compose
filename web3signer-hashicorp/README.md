@@ -10,8 +10,9 @@ docker compose up
 
 ## Generate Hashicorp configuration for Web3Signer if required.
 
-Assuming that vault is up and running using above `docker compose up` command, use following commands to generate 5
-random BLS keys, import it in Hashicorp and generate Web3Signer configuration files. The config files will be generated in `web3signer/config/keys`
+Assuming that vault is up and running using above `docker compose up` command, use following commands to generate 50
+random BLS keys, import it in Hashicorp and generate Web3Signer configuration files. The config files will be generated 
+in `web3signer/config/keys`
 
 ```
 cd ./gen-keys
