@@ -7,10 +7,23 @@ services:
   vault-ssl-certificate:
     image: alpine:latest
     container_name: 'ws-vault-ssl-certificate'
+    environment:
+      - TRUSTSTORE_PASSWORD=${TRUSTSTORE_PASSWORD:-test123}
     command: sh -c /scripts/gen-cert.sh
     volumes:
       - ./certs:/certs
       - ./scripts:/scripts
+      - ../web3signer/config:/web3signer/config
+    healthcheck:
+      test: [ "CMD-SHELL", "[ -f /certs/server.crt ] && [ -f /web3signer/config/knownhosts ]" ]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 128M
     networks:
       - internal_network
   

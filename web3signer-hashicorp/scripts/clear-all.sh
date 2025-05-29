@@ -33,6 +33,20 @@ clean_files() {
     done
 }
 
+clean_key_files() {
+    local dir="$1"
+    if [ -d "${dir}" ]; then
+        echo "Cleaning key files in ${dir}..."
+        # Preserve .gitignore while removing other files
+        find "${dir}" \( -name "*.json" -o -name "*.yaml" -o -name "knownhosts" \) -delete
+        # Remove empty subdirectories (except the keys directory itself)
+        find "${dir}" -mindepth 1 -type d -empty -delete
+        echo "Preserved ${dir}/.gitignore"
+    else
+        echo "Directory not found (skipping): ${dir}"
+    fi
+}
+
 main() {
     # Clean Docker resources
     for service in "${services[@]}"; do
@@ -47,10 +61,10 @@ main() {
     )
 
     local vault_certs=(
-        "${SCRIPT_DIR}/../vault/certs/knownhosts"
         "${SCRIPT_DIR}/../vault/certs/server.crt"
         "${SCRIPT_DIR}/../vault/certs/server.key"
         "${SCRIPT_DIR}/../vault/certs/truststore.p12"
+        "${SCRIPT_DIR}/../vault/certs/knownhosts"
     )
 
     local vault_creds=(
@@ -59,7 +73,6 @@ main() {
     )
 
     local web3signer_files=(
-        "${SCRIPT_DIR}/../web3signer/config/keys"
         "${SCRIPT_DIR}/../web3signer/config/knownhosts"
     )
 
@@ -67,6 +80,9 @@ main() {
     clean_files "${vault_certs[@]}"
     clean_files "${vault_creds[@]}"
     clean_files "${web3signer_files[@]}"
+
+    # Special handling for keys directory
+    clean_key_files "${SCRIPT_DIR}/../web3signer/config/keys"
 
     echo "Cleanup completed successfully"
 }
