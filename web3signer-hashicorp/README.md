@@ -57,7 +57,10 @@ docker exec ws-develop /opt/async-profiler/bin/asprof \
 ```
  - See https://github.com/async-profiler/async-profiler
  - The output will be generated in `./profiler_output`
-
+```shell
+# Heap dump
+docker exec ws-develop jcmd 1 GC.heap_dump /tmp/profiler/heap_dump_4.hprof
+```
 ## Clean up
 ```shell
 # From another terminal window
