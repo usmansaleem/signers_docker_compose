@@ -6,12 +6,38 @@ networks:
 services:
   web3signer:
     image: consensys/web3signer:develop
+    #image: web3signer:test
     container_name: 'ws-develop'
-    command: --config-file=/var/config/config.yaml eth2
+    cap_add:
+      - SYS_ADMIN  # Required for async-profiler
+    security_opt:
+      - seccomp:unconfined  # Needed for profiling
+    environment:
+      - JAVA_OPTS=-Xmx2G
+        -XX:+UnlockDiagnosticVMOptions
+        -XX:+DebugNonSafepoints
+        -Dcom.sun.management.jmxremote
+        -Dcom.sun.management.jmxremote.port=9010
+        -Dcom.sun.management.jmxremote.rmi.port=9010
+        -Dcom.sun.management.jmxremote.local.only=false
+        -Dcom.sun.management.jmxremote.authenticate=false
+        -Dcom.sun.management.jmxremote.ssl=false
+        -Djava.rmi.server.hostname=localhost
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'    # Strictly limits to 2 CPU cores
+          memory: 4G     # Hard memory limit of 4GB
+    command:
+      - --config-file=/var/config/config.yaml
+      - eth2
     volumes:
       - ./config:/var/config
+      - ./profiler_output:/tmp/profiler  # Output directory
+      - ./async-profiler:/opt/async-profiler:ro  # Async-profiler binaries
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - "9000:9000"    # Web3Signer HTTP API
+      - "9001:9001"    # Metrics endpoint
+      - "9010:9010"    # JMX+ RMI for JMC
     networks:
       - internal_network

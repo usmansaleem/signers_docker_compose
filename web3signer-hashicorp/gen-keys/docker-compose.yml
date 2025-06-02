@@ -5,7 +5,7 @@ networks:
 
 services:
   w3s-conf-gen:
-    image: ghcr.io/usmansaleem/signer-configuration-generator:2.1.0
+    image: usmans/w3s-conf-gen:2.1.1
     container_name: 'w3s-conf-gen'
     environment:
       - JAVA_OPTS=-Djavax.net.ssl.trustStore=/certs/truststore.p12 -Djavax.net.ssl.trustStorePassword=${TRUSTSTORE_PASSWORD:-test123}

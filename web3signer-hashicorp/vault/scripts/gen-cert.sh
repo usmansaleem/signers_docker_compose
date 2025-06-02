@@ -5,6 +5,12 @@ set -e
 # Create directories if they don't exist
 mkdir -p /certs /web3signer/config
 
+# Skip if certificates already exist
+if [ -f /certs/server.crt ]; then
+  echo 'SSL certificate already exists'
+  exit 0
+fi
+
 # Cleanup function for error handling
 cleanup() {
   echo "Error occurred during certificate generation"
@@ -12,11 +18,6 @@ cleanup() {
   exit 1
 }
 trap cleanup EXIT ERR
-
-if [ -f /certs/server.crt ]; then
-  echo 'SSL certificate already exists'
-  exit 0
-fi
 
 echo "Installing openssl..."
 apk update && apk add openssl && rm -rf /var/cache/apk/*
