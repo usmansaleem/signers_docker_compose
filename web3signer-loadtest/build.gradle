@@ -1,6 +1,7 @@
 plugins {
-    id 'scala'
+    id 'java'
     id 'io.gatling.gradle' version '3.14.3'
+    id 'com.diffplug.spotless' version "7.0.4"
 }
 
 repositories {
@@ -11,9 +12,8 @@ gatling {
 
 }
 
-tasks.withType(ScalaCompile) {
-    scalaCompileOptions.forkOptions.with {
-        jvmArgs = ['-Xss100m'] // Scala compiler may require a larger stack size when compiling Gatling simulations
+spotless {
+    java {
+        googleJavaFormat()
     }
 }
-
