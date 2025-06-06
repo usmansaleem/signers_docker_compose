@@ -1,4 +1,4 @@
-# Web3Signer/Hashicorp docker compose
+# Web3Signer/Hashicorp/PostgreSQL docker compose
 
 Docker compose example showcasing Web3Signer and Hashicorp Vault integration with TLS enabled.
 
@@ -42,21 +42,9 @@ KEYS_COUNT=10000 docker compose up
 curl -X POST http://localhost:9000/reload
 ```
 
-## 4. Profiling with Async Profiler (Optional)
-To profiler Web3Signer's Java process:
-1. Install async-profiler (auto-detects architecture):
-```shell
-cd ./web3signer/async-profiler
-./install-profiler.sh
-```
-2. Generate flamegraph (or other async-profiler commands):
-```shell
-docker exec ws-develop /opt/async-profiler/bin/asprof \
-  -d 30 -e cpu -f /tmp/profiler/flamegraph.html \
-  $(docker exec ws-develop pidof java)
-```
- - See https://github.com/async-profiler/async-profiler
- - The output will be generated in `./profiler_output`
+## 4. Profiling (Optional)
+To generate Web3Signer's Java process heapdump from the host machine:
+
 ```shell
 # Heap dump
 docker exec ws-develop jcmd 1 GC.heap_dump /tmp/profiler/heap_dump_4.hprof

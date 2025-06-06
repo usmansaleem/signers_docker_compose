@@ -1,4 +1,0 @@
-# async-profiler/.gitignore
-*
-!.gitignore
-!install-profiler.sh
