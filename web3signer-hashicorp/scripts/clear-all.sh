@@ -10,7 +10,9 @@ clean_docker() {
     echo "Cleaning Docker resources for ${service}..."
     if [ -d "${SCRIPT_DIR}/../${service}" ]; then
         pushd "${SCRIPT_DIR}/../${service}" >/dev/null
-        docker compose down --rmi all -v || {
+
+        # Clean all profiles (including vault-proxy if it was used)
+        docker compose --profile vault-proxy down --rmi all -v --remove-orphans || {
             echo "Warning: Failed to clean ${service} Docker resources"
             popd >/dev/null
             return 1
@@ -39,7 +41,7 @@ clean_key_files() {
         echo "Cleaning key files in ${dir}..."
         # Preserve .gitignore while removing other files
         find "${dir}" \( -name "*.json" -o -name "*.yaml" -o -name "knownhosts" \) -delete
-        # Remove empty subdirectories (except the keys directory itself)
+        # Remove empty subdirectories (except the directory itself)
         find "${dir}" -mindepth 1 -type d -empty -delete
         echo "Preserved ${dir}/.gitignore"
     else
@@ -47,8 +49,22 @@ clean_key_files() {
     fi
 }
 
+clean_pid_directory() {
+    local dir="$1"
+    if [ -d "${dir}" ]; then
+        echo "Cleaning PID directory ${dir}..."
+        # Remove all files except .gitignore
+        find "${dir}" -type f ! -name '.gitignore' -delete
+        # Remove empty subdirectories (except the directory itself)
+        find "${dir}" -mindepth 1 -type d -empty -delete
+        echo "Preserved ${dir}/.gitignore"
+    else
+        echo "PID directory not found (skipping): ${dir}"
+    fi
+}
+
 main() {
-    # Clean Docker resources
+    # Clean Docker resources (including profiled services)
     for service in "${services[@]}"; do
         clean_docker "${service}"
     done
@@ -70,6 +86,7 @@ main() {
     local vault_creds=(
         "${SCRIPT_DIR}/../vault/creds/vault.token"
         "${SCRIPT_DIR}/../vault/creds/vault.unseal"
+        "${SCRIPT_DIR}/../vault/creds/vault-proxy"  # Updated to match config
     )
 
     local web3signer_files=(
@@ -81,8 +98,9 @@ main() {
     clean_files "${vault_creds[@]}"
     clean_files "${web3signer_files[@]}"
 
-    # Special handling for keys directory
+    # Special handling for directories
     clean_key_files "${SCRIPT_DIR}/../web3signer/config/keys"
+    clean_pid_directory "${SCRIPT_DIR}/../vault/vault-proxy-pid"  # Special handling for PID dir
 
     echo "Cleanup completed successfully"
 }

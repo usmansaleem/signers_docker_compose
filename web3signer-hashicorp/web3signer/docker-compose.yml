@@ -1,6 +1,6 @@
 services:
   web3signer:
-    image: consensys/web3signer:${WEB3SIGNER_TAG:-develop}"
+    image: consensys/web3signer:${WEB3SIGNER_TAG:-develop}
     container_name: 'ws-develop'
     cap_add:
       - SYS_ADMIN  # Needed for profiling
@@ -43,7 +43,7 @@ services:
 
   # Extract SQL migration scripts from Web3Signer image
   web3signer_sql_scripts:
-    image: "consensys/web3signer:${WEB3SIGNER_TAG:-develop}"
+    image: consensys/web3signer:${WEB3SIGNER_TAG:-develop}
     container_name: 'ws-sql-scripts'
     user: "0:0"  # Run as root to ensure permissions
     networks:
