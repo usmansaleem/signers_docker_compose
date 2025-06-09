@@ -31,8 +31,6 @@ services:
     image: hashicorp/vault:latest
     container_name: 'ws-vault-tls'
     command: ["server", "-config=/config/vault-server.hcl", "-log-level=debug"]
-    ports:
-      - "8200:8200"
     volumes:
       - "./certs:/tls"
       - "./data:/data"
