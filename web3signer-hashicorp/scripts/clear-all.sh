@@ -1,108 +1,83 @@
-#!/bin/bash
-
+#!/usr/bin/env bash
 set -euo pipefail
+shopt -s nullglob
 
+# Determine the directory this script lives in
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-declare -a services=("web3signer" "gen-keys" "vault")
+# Project root is one level up
+ROOT_DIR="$SCRIPT_DIR/.."
 
-clean_docker() {
-    local service="$1"
-    echo "Cleaning Docker resources for ${service}..."
-    if [ -d "${SCRIPT_DIR}/../${service}" ]; then
-        pushd "${SCRIPT_DIR}/../${service}" >/dev/null
+# Optional: change this to any profile you like
+PROFILE="vault-proxy"
 
-        # Clean all profiles (including vault-proxy if it was used)
-        docker compose --profile vault-proxy down --rmi all -v --remove-orphans || {
-            echo "Warning: Failed to clean ${service} Docker resources"
-            popd >/dev/null
-            return 1
-        }
-        popd >/dev/null
-    else
-        echo "Warning: ${service} directory not found"
-    fi
-}
+# Compose files live in these subfolders of the project root
+COMPOSE_DIRS=(
+  "$ROOT_DIR/gen-keys"
+  "$ROOT_DIR/vault"
+  "$ROOT_DIR/web3signer"
+)
 
-clean_files() {
-    local paths=("$@")
-    for path in "${paths[@]}"; do
-        if [ -e "${path}" ]; then
-            echo "Removing ${path}..."
-            rm -rf "${path}"
-        else
-            echo "Not found (skipping): ${path}"
-        fi
-    done
-}
+echo "🛑 Bringing down all Docker Compose stacks (with --profile $PROFILE)…"
+for dir in "${COMPOSE_DIRS[@]}"; do
+  for file in "$dir"/compose*.yml; do
+    echo "↓ docker compose --profile $PROFILE -f $file down --rmi all -v --remove-orphans"
+    docker compose --profile "$PROFILE" -f "$file" down --rmi all -v --remove-orphans
+  done
+done
 
-clean_key_files() {
-    local dir="$1"
-    if [ -d "${dir}" ]; then
-        echo "Cleaning key files in ${dir}..."
-        # Preserve .gitignore while removing other files
-        find "${dir}" \( -name "*.json" -o -name "*.yaml" -o -name "knownhosts" \) -delete
-        # Remove empty subdirectories (except the directory itself)
-        find "${dir}" -mindepth 1 -type d -empty -delete
-        echo "Preserved ${dir}/.gitignore"
-    else
-        echo "Directory not found (skipping): ${dir}"
-    fi
-}
+echo
 
-clean_pid_directory() {
-    local dir="$1"
-    if [ -d "${dir}" ]; then
-        echo "Cleaning PID directory ${dir}..."
-        # Remove all files except .gitignore
-        find "${dir}" -type f ! -name '.gitignore' -delete
-        # Remove empty subdirectories (except the directory itself)
-        find "${dir}" -mindepth 1 -type d -empty -delete
-        echo "Preserved ${dir}/.gitignore"
-    else
-        echo "PID directory not found (skipping): ${dir}"
-    fi
-}
+echo "🧹 Cleaning up generated files…"
 
-main() {
-    # Clean Docker resources (including profiled services)
-    for service in "${services[@]}"; do
-        clean_docker "${service}"
-    done
+# 1. vault/certs: remove everything except .gitignore
+if [ -d "$ROOT_DIR/vault/certs" ]; then
+  echo "→ Cleaning $ROOT_DIR/vault/certs (preserving .gitignore)"
+  find "$ROOT_DIR/vault/certs" -mindepth 1 ! -name ".gitignore" -exec rm -rf {} +
+fi
 
-    # Vault files cleanup
-    local vault_data=(
-        "${SCRIPT_DIR}/../vault/data/core"
-        "${SCRIPT_DIR}/../vault/data/logical"
-        "${SCRIPT_DIR}/../vault/data/sys"
-    )
+# 2. vault/creds: remove everything except .gitignore
+if [ -d "$ROOT_DIR/vault/creds" ]; then
+  echo "→ Cleaning $ROOT_DIR/vault/creds (preserving .gitignore)"
+  find "$ROOT_DIR/vault/creds" -mindepth 1 ! -name ".gitignore" -exec rm -rf {} +
+fi
 
-    local vault_certs=(
-        "${SCRIPT_DIR}/../vault/certs/server.crt"
-        "${SCRIPT_DIR}/../vault/certs/server.key"
-        "${SCRIPT_DIR}/../vault/certs/truststore.p12"
-        "${SCRIPT_DIR}/../vault/certs/knownhosts"
-    )
+# 3. vault/data: remove everything except .gitignore
+if [ -d "$ROOT_DIR/vault/data" ]; then
+  echo "→ Cleaning $ROOT_DIR/vault/data (preserving .gitignore)"
+  find "$ROOT_DIR/vault/data" -mindepth 1 ! -name ".gitignore" -exec rm -rf {} +
+fi
 
-    local vault_creds=(
-        "${SCRIPT_DIR}/../vault/creds/vault.token"
-        "${SCRIPT_DIR}/../vault/creds/vault.unseal"
-        "${SCRIPT_DIR}/../vault/creds/vault-proxy"  # Updated to match config
-    )
+# 4. vault/vault-proxy-pid: remove everything except .gitignore
+if [ -d "$ROOT_DIR/vault/vault-proxy-pid" ]; then
+  echo "→ Cleaning $ROOT_DIR/vault/vault-proxy-pid (preserving .gitignore)"
+  find "$ROOT_DIR/vault/vault-proxy-pid" -mindepth 1 ! -name ".gitignore" -exec rm -rf {} +
+fi
 
-    local web3signer_files=(
-        "${SCRIPT_DIR}/../web3signer/config/knownhosts"
-    )
+# 5. web3signer/config/keys: remove everything except .gitignore
+if [ -d "$ROOT_DIR/web3signer/config/keys" ]; then
+  echo "→ Cleaning $ROOT_DIR/web3signer/config/keys (preserving .gitignore)"
+  find "$ROOT_DIR/web3signer/config/keys" -mindepth 1 ! -name ".gitignore" -exec rm -rf {} +
+fi
 
-    clean_files "${vault_data[@]}"
-    clean_files "${vault_certs[@]}"
-    clean_files "${vault_creds[@]}"
-    clean_files "${web3signer_files[@]}"
+# 5b. web3signer/config/keystores: remove everything except .gitignore
+if [ -d "$ROOT_DIR/web3signer/config/keystores" ]; then
+  echo "→ Cleaning $ROOT_DIR/web3signer/config/keystores (preserving .gitignore)"
+  find "$ROOT_DIR/web3signer/config/keystores" -mindepth 1 ! -name ".gitignore" -exec rm -rf {} +
+fi
 
-    # Special handling for directories
-    clean_key_files "${SCRIPT_DIR}/../web3signer/config/keys"
-    clean_pid_directory "${SCRIPT_DIR}/../vault/vault-proxy-pid"  # Special handling for PID dir
+# 6. Remove knownhosts file
+knownhosts_file="$ROOT_DIR/web3signer/config/knownhosts"
+if [ -f "$knownhosts_file" ]; then
+  echo "→ Removing $knownhosts_file"
+  rm -f "$knownhosts_file"
+fi
 
-    echo "Cleanup completed successfully"
-}
+# 7. web3signer/config/heapdumps: remove everything except .gitignore
+if [ -d "$ROOT_DIR/web3signer/config/heapdumps" ]; then
+  echo "→ Cleaning $ROOT_DIR/web3signer/config/heapdumps (preserving .gitignore)"
+  find "$ROOT_DIR/web3signer/config/heapdumps" -mindepth 1 ! -name ".gitignore" -exec rm -rf {} +
+fi
 
-main "$@"
+echo
+
+echo "✅ All clean!"

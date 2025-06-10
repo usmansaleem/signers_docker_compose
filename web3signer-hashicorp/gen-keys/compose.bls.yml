@@ -1,0 +1,13 @@
+services:
+  bls_keys_gen:
+    image: usmans/w3s-conf-gen:3.0.0
+    container_name: 'bls_keys_gen'
+    command:
+      - keystores
+      - --output
+      - /var/config/keystores
+      - --count
+      - "${KEYS_COUNT:-50}"
+      - --no-generate-config
+    volumes:
+      - ../web3signer/config/keystores:/var/config/keystores

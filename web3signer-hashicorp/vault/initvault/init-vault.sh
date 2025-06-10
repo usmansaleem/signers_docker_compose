@@ -59,6 +59,8 @@ initialize_vault() {
     if [ -w "$CREDS_DIR" ]; then
         echo -n "$VAULT_TOKEN" > "$CREDS_DIR/vault.token" && chmod 600 "$CREDS_DIR/vault.token"
         echo -n "$VAULT_KEY" > "$CREDS_DIR/vault.unseal" && chmod 600 "$CREDS_DIR/vault.unseal"
+        # For Vault Proxy mode, use empty.token as it is rquired by the web3signer file
+         echo -n "Token not required in Proxy Mode" > "$CREDS_DIR/empty.token" && chmod 600 "$CREDS_DIR/empty.token"
         log "Vault credentials securely stored in $CREDS_DIR"
     else
         log "Error: Credentials directory $CREDS_DIR is not writable"

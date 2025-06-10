@@ -1,0 +1,36 @@
+networks:
+  internal_network:
+    name: '${INTERNAL_NETWORK_NAME:-web3signer_hashicorp_tls_network}'
+    external: true # Uses network created by vault/docker-compose.yml
+
+services:
+  hashicorp_keys_gen:
+    image: usmans/w3s-conf-gen:3.0.0
+    container_name: 'hashicorp_keys_gen'
+    environment:
+      - JAVA_OPTS=-Djavax.net.ssl.trustStore=/certs/truststore.p12 -Djavax.net.ssl.trustStorePassword=${TRUSTSTORE_PASSWORD:-test123}
+    command:
+      - hashicorp
+      - --token-file
+      - /creds/empty.token
+      - --count
+      - "${KEYS_COUNT:-50}"
+      - --output
+      - /config/keys
+      - --tls-knownhosts-file
+      - /var/config/knownhosts
+      - --url
+      - "${VAULT_HOST:-https://vault:8200}/v1/secret"
+
+    volumes:
+      - ../vault/creds:/creds:ro
+      - ../vault/certs:/certs:ro
+      - ../web3signer/config/keys:/config/keys
+    networks:
+      - internal_network
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -k -f ${VAULT_HOST:-https://vault:8200}/v1/sys/health || exit 1" ]
+      interval: 5s
+      timeout: 3s
+      retries: 30  # Wait up to 2.5 minutes (30 retries * 5s)
+    restart: "no"
