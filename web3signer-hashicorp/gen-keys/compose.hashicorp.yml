@@ -1,19 +1,21 @@
 services:
-  hashicorp_proxy_keys_gen:
+  hashicorp_keys_gen:
     image: '${IMAGE_NAME}'
-    container_name: 'hashicorp_proxy_keys_gen'
+    container_name: 'hashicorp_keys_gen'
     environment:
       - JAVA_OPTS=-Djavax.net.ssl.trustStore=/certs/truststore.p12 -Djavax.net.ssl.trustStorePassword=${TRUSTSTORE_PASSWORD:-test123}
     command:
       - hashicorp
       - --token-file
-      - /creds/empty.token
+      - /creds/vault.token
       - --count
       - "${KEYS_COUNT:-50}"
       - --output
       - /config/keys
+      - --tls-knownhosts-file
+      - /var/config/knownhosts
       - --url
-      - "${VAULT_HOST:-http://vault-proxy:8200}/v1/secret"
+      - "${VAULT_HOST:-https://vault:8200}/v1/secret"
 
     volumes:
       - ../vault/creds:/creds:ro
@@ -21,11 +23,6 @@ services:
       - ../web3signer/config/keys:/config/keys
     networks:
       - internal_network
-    healthcheck:
-      test: [ "CMD-SHELL", "curl -k -f ${VAULT_HOST:-http://vault-proxy:8200}/v1/sys/health || exit 1" ]
-      interval: 5s
-      timeout: 3s
-      retries: 30  # Wait up to 2.5 minutes (30 retries * 5s)
     restart: "no"
 
 # Network definition
