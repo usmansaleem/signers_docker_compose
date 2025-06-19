@@ -32,6 +32,8 @@ Web3Signer. Based on your testing needs, you can generate the following configur
 
 - Generate and insert BLS Keys into Hashicorp Vault to be loaded via yaml config files. Generated in
   `./web3signer/config/keys` directory.
+- Generate and insert BLS Keys into Hashicorp Proxy to be loaded via yaml config files. Generated in
+  `./web3signer/config/keys` directory.
 - Generate (Light) BLS keystores and password files to be loaded via yaml config files. Generated in
   `./web3signer/config/keys` directory.
 - Generate (Light) BLS Keystores and password files to be bulkloaded. Generated in `./web3signer/config/keystores`

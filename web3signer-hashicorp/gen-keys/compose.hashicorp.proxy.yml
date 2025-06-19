@@ -1,6 +1,6 @@
 services:
   hashicorp_keys_gen:
-    image: usmans/w3s-conf-gen:3.0.0
+    image: '${IMAGE_NAME}'
     container_name: 'hashicorp_keys_gen'
     environment:
       - JAVA_OPTS=-Djavax.net.ssl.trustStore=/certs/truststore.p12 -Djavax.net.ssl.trustStorePassword=${TRUSTSTORE_PASSWORD:-test123}

@@ -1,10 +1,16 @@
 # Web3Signer BLS Key Generation Utility
 
-The docker compose files in this directory provide the capability to generate BLS keys for Web3Signer in three modes:
+The docker compose files in this directory provide the capability to generate BLS keys for Web3Signer in the following 
+modes:
 
-- **BLS Keys Generation - Bulkload**
-- **BLS Keys Generation - HashiCorp Vault integration**
-- **BLS Keys Generation - HashiCorp Vault proxy integration**
+- Generate and insert BLS Keys into Hashicorp Vault to be loaded via yaml config files. Generated in
+  `../web3signer/config/keys` directory.
+- Generate and insert BLS Keys into Hashicorp Proxy to be loaded via yaml config files. Generated in
+  `../web3signer/config/keys` directory.
+- Generate (Light) BLS keystores and password files to be loaded via yaml config files. Generated in
+  `../web3signer/config/keys` directory.
+- Generate (Light) BLS Keystores and password files to be bulkloaded. Generated in `../web3signer/config/keystores`
+  directory.
 
 Each mode uses a dedicated Docker Compose file. You can generate keys before or after starting Web3Signer—if you 
 generate them afterwards, be sure to reload the keys via the Web3Signer HTTP API.
@@ -14,49 +20,44 @@ generate them afterwards, be sure to reload the keys via the Web3Signer HTTP API
 ## Prerequisites
 
 - Docker and Docker Compose installed on your machine.
-- (Vault modes only) A HashiCorp Vault server configured and running. See [`../vault/README.md`](../vault/README.md) 
-- for Vault setup instructions.
-
----
-
-## Reloading Keys
-
-If you add or regenerate keys while Web3Signer is running, trigger a reload:
-
+- A custom docker network named `w3s_network` is created. If not, run:
 ```sh
-curl -X POST http://localhost:9000/reload
+docker network create w3s_network
+```
+- (Vault modes only) A HashiCorp Vault server configured and running. See [`../vault/README.md`](../vault/README.md) for
+Vault setup instructions.
+- Web3Signer is running (to test reload endpoint)
+---
+
+## 1. BLS Keystores - Bulkload
+
+```shell
+KEYS_COUNT=500 docker compose -f ./compose.bls.yml up
 ```
 
 ---
 
-## 1. BLS Keys Generation - Bulkload
-Generate BLS Keys that can be bulkloaded into Web3Signer. They are stored in the `../web3signer/config/keystores` 
-directory.
+## 2. BLS Keystores - Configuration Files
+
 ```shell
-KEYS_COUNT=500 \
-  docker compose -f ./compose.bls.yml up
+KEYS_COUNT=500 docker compose -f ./compose.bls.config.yml up
 ```
 
 ---
 
-## 2. BLS Keys Generation - HashiCorp Vault integration
-Generate and insert BLS keys into HashiCorp Vault. Generates Web3Signer configuration files in 
-`../web3signer/config/keys` directory.
+## 3. HashiCorp Vault - Yaml Configuration Files
 
 ```shell
-KEYS_COUNT=500 \
-  docker compose -f ./compose.hashicorp.yml up
+KEYS_COUNT=500 docker compose -f ./compose.hashicorp.yml up
 ```
 
 ---
 
-## 3. BLS Keys Generation - HashiCorp Vault Proxy integration
-Generate and insert BLS keys into HashiCorp Vault via Vault Proxy. Generates Web3Signer configuration files in
-`../web3signer/config/keys` directory.
+## 4. HashiCorp Vault Proxy - Yaml Configuration Files
+
 
 ```shell
-KEYS_COUNT=500 \
-  docker compose -f ./compose.hashicorp.yml up
+KEYS_COUNT=500 docker compose -f ./compose.hashicorp.proxy.yml up
 ```
 
 ---
