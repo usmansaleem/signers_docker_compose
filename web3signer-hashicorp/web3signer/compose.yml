@@ -95,4 +95,4 @@ volumes:
 networks:
   internal_network:
     name: '${INTERNAL_NETWORK_NAME:-web3signer_hashicorp_tls_network}'
-    external: true
+    external: true  # Uses network created by vault/compose.yml

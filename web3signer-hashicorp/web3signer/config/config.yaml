@@ -19,5 +19,5 @@ eth2.slashing-protection-db-password: postgres
 eth2.slashing-protection-db-url: "jdbc:postgresql://db/web3signer"
 # eth2 BLS keystores bulk loading
 eth2.keystores-path: "/var/config/keystores"
-eth2.keystores-password-file: "/var/config/keystores/passwords.txt"
+eth2.keystores-password-file: "/var/config/keystores/password.txt"
 
