@@ -94,5 +94,5 @@ volumes:
 # Network definition
 networks:
   internal_network:
-    name: '${INTERNAL_NETWORK_NAME:-web3signer_hashicorp_tls_network}'
-    external: true  # Uses network created by vault/compose.yml
+    name: '${INTERNAL_NETWORK_NAME:-w3s_network}'
+    external: true  # Manually created network for internal communication

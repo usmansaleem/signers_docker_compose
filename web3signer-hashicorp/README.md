@@ -4,50 +4,64 @@ Docker compose example showcasing Web3Signer and Hashicorp Vault integration wit
 
 ## Prerequisites
 1. Ensure Docker is running
-2. For profiling: Linux host or Docker Desktop with 4GB+ memory allocated
+2. A custom docker network named `w3s_network` is created. If not, run:
 
-- Make sure Hashicorp docker compose is up (using different terminal window). See [README](./vault/README.md) for more details.
+```sh
+docker network create w3s_network
+```
+
+3. For profiling: Linux host or Docker Desktop with 4GB+ memory allocated
+
+---
+
 ## 1. Start Hashicorp Vault
+
+Using a different terminal window, bring Hashicorp Vault up. See [README](./vault/README.md) for more details.
+
 ```sh
 
 cd ./vault
 docker compose up
 ```
-See [detailed vault README](./vault/README.md)
+---
 
-## 2. Run Web3Signer
+## 2. Generate and Load Keys.
+
+The `gen-keys` [docker compose](./gen-keys/README.md) can be used to set up BLS keys that will be loaded into
+Web3Signer. Based on your testing needs, you can generate the following configurations:
+
+- Generate and insert BLS Keys into Hashicorp Vault to be loaded via yaml config files. Generated in
+  `./web3signer/config/keys` directory.
+- Generate (Light) BLS keystores and password files to be loaded via yaml config files. Generated in
+  `./web3signer/config/keys` directory.
+- Generate (Light) BLS Keystores and password files to be bulkloaded. Generated in `./web3signer/config/keystores`
+  directory.
+
+You can mix and match the above configurations based on your testing needs.
+
+The Keys can either be generated before starting Web3Signer or after it is running.
+
+
+## 3. Run Web3Signer
 
 ```sh
 cd ./web3signer
 docker compose up
 ```
 
-## 3. Generate and Load Keys (Optional).
-Generate and import BLS keys into Hashicorp Vault. Creates configs in `web3signer/config/keys` directory. 
-
-### Option A: Generate Before running Web3Signer
-
-```sh
-cd ./gen-keys
-docker compose up
-# For custom key count:
-KEYS_COUNT=10000 docker compose up
-```
-
-### Option B: Generate After running Web3Signer
-1. Start Web3Signer (see step 2 above).
-2. Then generate keys (see option A above).
-3. Trigger Web3Signer to reload the keys:
+Reload the Web3Signer configuration to load the keys (if generated after starting Web3Signer):
 ```sh
 curl -X POST http://localhost:9000/reload
 ```
+
+---
 
 ## 4. Profiling (Optional)
 To generate Web3Signer's Java process heapdump from the host machine:
 
 ```shell
 # Heap dump
-docker exec ws-develop jcmd 1 GC.heap_dump /tmp/profiler/heap_dump_4.hprof
+docker exec ws-develop jcmd 1 GC.heap_dump /heapsumps/w3s_heapdump.hprof
 ```
 ## Clean up
 ```shell
@@ -57,3 +71,5 @@ docker compose down
 # Full cleanup
 ./scripts/clear-all.sh
 ```
+
+---

@@ -11,3 +11,9 @@ services:
       - --no-generate-config
     volumes:
       - ../web3signer/config/keystores:/var/config/keystores
+
+# Network definition
+networks:
+  internal_network:
+    name: '${INTERNAL_NETWORK_NAME:-w3s_network}'
+    external: true  # Manually created network for internal communication

@@ -1,8 +1,3 @@
-networks:
-  internal_network:
-    name: 'web3signer_hashicorp_tls_network'
-    # NOT external - created by this compose file
-
 services:
   vault-ssl-certificate:
     image: alpine:latest
@@ -83,3 +78,9 @@ services:
         condition: service_completed_successfully
     networks:
       - internal_network
+
+# Network definition
+networks:
+  internal_network:
+    name: '${INTERNAL_NETWORK_NAME:-w3s_network}'
+    external: true  # Manually created network for internal communication
