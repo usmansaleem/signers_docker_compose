@@ -1,7 +1,7 @@
 services:
     web3signer:
         container_name: "ws-web3signer-eth1"
-        image: "consensys/web3signer:25.4.1"
+        image: "${IMAGE_NAME}"
         command: --config-file=/var/config/config.yaml eth1
         volumes:
         - ./config:/var/config
