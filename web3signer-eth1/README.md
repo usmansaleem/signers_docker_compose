@@ -14,6 +14,15 @@ npm install
 node test.js
 ```
 
+## EIP-712 eth_signTypedData Test
+To test EIP-712 eth_signTypedData JSON-RPC:
+
+```shell
+cd ./signing-test
+npm install
+node testTypedData.js
+```
+
 ## Clean up
 
 ```shell
