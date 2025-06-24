@@ -1,0 +1,15 @@
+# Stage 1: Extract SQL files from web3signer
+ARG WEB3SIGNER_TAG=develop
+FROM consensys/web3signer:${WEB3SIGNER_TAG} AS sql-source
+WORKDIR /sql-source
+RUN cp /opt/web3signer/migrations/postgresql/*.sql ./
+
+# Stage 2: Create minimal copier (5MB Alpine)
+FROM alpine:3.18
+COPY --from=sql-source /sql-source/*.sql /sql-source/
+
+# Validate files were copied during build
+RUN [ "$(ls -A /sql-source)" ] || (echo "Error: No SQL files found in build!" >&2 && exit 1)
+
+ENTRYPOINT ["sh", "-c"]
+CMD ["echo 'Updating SQL files...'; rm -f /flyway/sql/*.sql; cp -v /sql-source/*.sql /flyway/sql/; echo 'Success! Copied:'; ls /flyway/sql/; exit 0"]

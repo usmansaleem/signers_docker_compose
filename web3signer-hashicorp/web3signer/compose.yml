@@ -43,14 +43,18 @@ services:
 
   # Extract SQL migration scripts from Web3Signer image
   web3signer_sql_scripts:
-    image: consensys/web3signer:${WEB3SIGNER_TAG:-develop}
+    build:
+      context: .
+      dockerfile: Dockerfile.sql-copier
+      args:
+        WEB3SIGNER_TAG: ${WEB3SIGNER_TAG:-develop}  # Inherits from env
     container_name: 'ws-sql-scripts'
     user: "0:0"  # Run as root to ensure permissions
     networks:
       - internal_network
     volumes:
       - sql:/flyway/sql
-    entrypoint: [ "sh", "-c", "rm /flyway/sql/*.sql; cp /opt/web3signer/migrations/postgresql/*.sql /flyway/sql/; echo 'sql files copied!'; ls /flyway/sql/*.sql" ]
+    restart: "no"  # Critical: ensures single run
 
   # PostgreSQL database service
   db:

@@ -50,6 +50,11 @@ The Keys can either be generated before starting Web3Signer or after it is runni
 cd ./web3signer
 docker compose up
 ```
+[!NOTE] If you are modifying SQL files and want to rebuild sql-copier image, run:
+
+```shell
+docker compose build --no-cache && docker compose up
+```
 
 Reload the Web3Signer configuration to load the keys (if generated after starting Web3Signer):
 ```sh
