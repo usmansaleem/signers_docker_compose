@@ -4,7 +4,7 @@ Docker compose example showcasing Web3Signer and Hashicorp Vault integration wit
 
 ## Prerequisites
 1. Ensure Docker is running
-2. A custom docker network named `w3s_network` is created. If not, run:
+2. A custom docker network named `w3s_network` exists or created:
 
 ```sh
 docker network create w3s_network
