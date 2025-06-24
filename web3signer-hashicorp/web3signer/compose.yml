@@ -50,7 +50,7 @@ services:
       - internal_network
     volumes:
       - sql:/flyway/sql
-    entrypoint: [ "sh", "-c", "ls /flyway/sql/*.sql; rm /flyway/sql/*.sql; cp /opt/web3signer/migrations/postgresql/*.sql /flyway/sql/; echo 'sql files copied!'" ]
+    entrypoint: [ "sh", "-c", "rm /flyway/sql/*.sql; cp /opt/web3signer/migrations/postgresql/*.sql /flyway/sql/; echo 'sql files copied!'; ls /flyway/sql/*.sql" ]
 
   # PostgreSQL database service
   db:
@@ -75,7 +75,7 @@ services:
   flyway:
     image: "docker.io/flyway/flyway:${FLYWAY_TAG:-latest}"
     container_name: 'ws-flyway'
-    command: -url=jdbc:postgresql://db:5432/web3signer -user=postgres -password=postgres -connectRetries=60 migrate
+    command: -locations="filesystem:./sql" -url=jdbc:postgresql://db:5432/web3signer -user=postgres -password=postgres -connectRetries=60 migrate
     volumes:
       - sql:/flyway/sql
     depends_on:
