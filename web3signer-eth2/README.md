@@ -61,6 +61,15 @@ Reload the Web3Signer configuration to load the keys (if generated after startin
 curl -X POST http://localhost:9000/reload
 ```
 
+To test Key Manager API:
+
+```sh
+CONFIG_FILE_NAME=config-km.yaml docker compose up
+```
+Followed by running `import_keystores.sh` which will upload keystores from `./config/keystores` directory. They should 
+be uploaded to `config/km/ks` directory or skip storage on disk depending on the setting in `config-km.yaml`.
+
+
 ---
 
 ## 4. Profiling (Optional)

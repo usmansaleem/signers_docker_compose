@@ -1,0 +1,28 @@
+http-listen-host: "0.0.0.0"
+http-listen-port: 9000
+http-host-allowlist: "*"
+
+metrics-enabled: true
+metrics-host: "0.0.0.0"
+metrics-port: 9001
+metrics-host-allowlist: "*"
+
+logging: "INFO"
+
+# Load Web3Signer yaml config files that can load keys from Hashicorp or local BLS keystores
+key-store-path: /var/config/keys
+
+# eth2 subcommand options
+eth2.slashing-protection-enabled: true
+eth2.slashing-protection-db-username: postgres
+eth2.slashing-protection-db-password: postgres
+eth2.slashing-protection-db-url: "jdbc:postgresql://db/web3signer"
+
+# eth2 - Upload keys via key manager API
+eth2.key-manager-api-enabled: true
+# Experimental - Keep keys only in memory - do not store on disk
+Xkey-manager-skip-keystore-storage: false
+# directories which are used both for uploading via keymanaer API and bulkloading at startup
+eth2.keystores-path: "/var/config/km/ks"
+eth2.keystores-passwords-path: "/var/config/km/pwds"
+

@@ -1,6 +1,6 @@
 services:
   web3signer:
-    image: consensys/web3signer:${WEB3SIGNER_TAG:-develop}
+    image: ${WEB3SIGNER_IMAGE:-consensys/web3signer:develop}
     container_name: 'ws-develop'
     cap_add:
       - SYS_ADMIN  # Needed for profiling
@@ -26,7 +26,7 @@ services:
           cpus: '2.0'    # Strictly limits to 2 CPU cores
           memory: 4G     # Hard memory limit of 4GB
     command:
-      - --config-file=/var/config/config.yaml
+      - --config-file=/var/config/${CONFIG_FILE_NAME:-config.yaml}
       - eth2
     volumes:
       - ./config:/var/config
@@ -58,9 +58,10 @@ services:
 
   # PostgreSQL database service
   db:
-    image: "docker.io/bitnami/postgresql:${PG_TAG:-14}"
+    image: "postgres:${PG_TAG:-latest}"
     container_name: 'ws-pg'
     restart: on-failure
+    shm_size: 128mb
     environment:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=web3signer
@@ -70,7 +71,7 @@ services:
     networks:
       - internal_network
     volumes:
-      - dbdata:/bitnami/postgresql
+      - dbdata:/var/lib/postgresql
     depends_on:
       web3signer_sql_scripts:
         condition: service_completed_successfully
