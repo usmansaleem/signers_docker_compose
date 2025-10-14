@@ -58,14 +58,13 @@ services:
 
   # PostgreSQL database service
   db:
-    image: "postgres:${PG_TAG:-latest}"
+    image: "postgres:${PG_TAG:-18}"
     container_name: 'ws-pg'
     restart: on-failure
     shm_size: 128mb
     environment:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=web3signer
-      - POSTGRES_PORT_NUMBER=5432
     ports:
       - '5432:5432'
     networks:

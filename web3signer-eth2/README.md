@@ -50,6 +50,11 @@ The Keys can either be generated before starting Web3Signer or after it is runni
 cd ./web3signer
 docker compose up
 ```
+Or with custom web3siger image (and/or config file):
+```sh
+WEB3SIGNER_IMAGE=web3signer:keymanager_pr CONFIG_FILE_NAME=config-km.yaml docker compose up
+```
+
 [!NOTE] If you are modifying SQL files and want to rebuild sql-copier image, run:
 
 ```shell

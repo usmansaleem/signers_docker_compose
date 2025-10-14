@@ -21,7 +21,7 @@ eth2.slashing-protection-db-url: "jdbc:postgresql://db/web3signer"
 # eth2 - Upload keys via key manager API
 eth2.key-manager-api-enabled: true
 # Experimental - Keep keys only in memory - do not store on disk
-Xkey-manager-skip-keystore-storage: false
+eth2.Xkey-manager-skip-keystore-storage: true
 # directories which are used both for uploading via keymanaer API and bulkloading at startup
 eth2.keystores-path: "/var/config/km/ks"
 eth2.keystores-passwords-path: "/var/config/km/pwds"
