@@ -1,0 +1,14 @@
+# Generic configuration before subcommand
+key-store-path: /var/config/keystores
+logging: "DEBUG"
+
+# eth1 subcommand configuration
+
+# Chain ID is from Kurtosis
+eth1.chain-id: 3151908
+
+# Besu is running via Kurtosis on host.docker.internal
+eth1.downstream-http-host: "host.docker.internal"
+# Besu port obtained from Kurtosis. `kurtosis enclave inspect besu-teku`
+eth1.downstream-http-port: 32003
+

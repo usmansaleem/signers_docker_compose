@@ -1,0 +1,62 @@
+participants_matrix:
+  el:
+    - el_type: besu
+      el_image: hyperledger/besu:develop
+      el_log_level: "info"
+  cl:
+    - cl_type: teku
+      cl_image: consensys/teku:develop
+      count: 1
+
+network_params:
+  min_validator_withdrawability_delay: 1
+  shard_committee_period: 1
+  churn_limit_quotient: 16
+  fulu_fork_epoch: 10
+  genesis_delay: 120
+  preset: minimal
+
+additional_services:
+  - dora
+  - tx_fuzz
+
+dora_params:
+  image: "ethpandaops/dora:master-latest"
+
+# Global parameter to set the exit ip address of services and public ports
+port_publisher:
+  # Execution Layer public port exposed to your local machine
+  # Disabled by default
+  # Public port start defaults to 32000
+  # You can't run multiple enclaves on the same port settings
+  el:
+    enabled: true
+    public_port_start: 32000
+  # Consensus Layer public port exposed to your local machine
+  # Disabled by default
+  # Public port start defaults to 33000
+  # You can't run multiple enclaves on the same port settings
+  cl:
+    enabled: true
+    public_port_start: 33000
+  # Validator client public port exposed to your local machine
+  # Disabled by default
+  # Public port start defaults to 34000
+  # You can't run multiple enclaves on the same port settings
+  vc:
+    enabled: true
+    public_port_start: 34000
+  # remote signer public port exposed to your local machine
+  # Disabled by default
+  # Public port start defaults to 35000
+  # You can't run multiple enclaves on the same port settings
+  remote_signer:
+    enabled: true
+    public_port_start: 35000
+  # Additional services public port exposed to your local machine
+  # Disabled by default
+  # Public port start defaults to 36000
+  # You can't run multiple enclaves on the same port settings
+  additional_services:
+    enabled: true
+    public_port_start: 36000
