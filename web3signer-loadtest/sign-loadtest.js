@@ -21,7 +21,7 @@ export default function (data) {
     const pubkeys = data.pubkeys;
     const pubkey = pubkeys[Math.floor(Math.random() * pubkeys.length)];
 
-    // Prepare the payload (customize slot as needed)
+    // Prepare the payload
     const payload = JSON.stringify({
         type: "block",
         fork_info: {
@@ -54,14 +54,37 @@ export default function (data) {
         }
     });
 
-    // Send the sign request
-    let res = http.post(`http://localhost:9000/api/v1/eth2/sign/${pubkey}`, payload, {
-        headers: { 'Content-Type': 'application/json' },
-    });
+    // Make the POST request
+    const params = {
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    };
 
-    check(res, {
+    let response = http.post(
+        `http://localhost:9000/api/v1/eth2/sign/${pubkey}`,
+        payload,
+        params
+    );
+
+    // Check the response - for plain text signature
+    check(response, {
         'status is 200': (r) => r.status === 200,
+        'response has signature': (r) => {
+            // Check if body is not empty and contains text
+            return r.body && r.body.length > 0;
+        },
+        'signature format looks valid': (r) => {
+            // Check if it looks like a hex signature (starts with 0x or is hex chars)
+            const body = r.body.trim();
+            return body.startsWith('0x') || /^[0-9a-fA-F]+$/.test(body);
+        }
     });
 
-    sleep(0.1); // Adjust sleep for desired request rate
+    // Optional: Log first few responses to verify format
+    if (__ITER < 3) {  // Only log first 3 iterations
+        console.log(`Response for pubkey ${pubkey}: ${response.body}`);
+    }
+
+    sleep(1);
 }

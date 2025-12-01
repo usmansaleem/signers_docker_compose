@@ -1,19 +1,6 @@
 # Web3Signer BLS Key Generation Utility
 
-The docker compose files in this directory provide the capability to generate BLS keys for Web3Signer in the following 
-modes:
-
-- Generate and insert BLS Keys into Hashicorp Vault to be loaded via yaml config files. Generated in
-  `../web3signer/config/keys` directory.
-- Generate and insert BLS Keys into Hashicorp Proxy to be loaded via yaml config files. Generated in
-  `../web3signer/config/keys` directory.
-- Generate (Light) BLS keystores and password files to be loaded via yaml config files. Generated in
-  `../web3signer/config/keys` directory.
-- Generate (Light) BLS Keystores and password files to be bulkloaded. Generated in `../web3signer/config/keystores`
-  directory.
-
-Each mode uses a dedicated Docker Compose file. You can generate keys before or after starting Web3Signer—if you 
-generate them afterwards, be sure to reload the keys via the Web3Signer HTTP API.
+Uses docker images generated from: https://github.com/usmansaleem/signer-configuration-generator
 
 ---
 
@@ -31,8 +18,14 @@ Vault setup instructions.
 
 ## 1. BLS Keystores - Bulkload
 
+Light Keys (default KDF Counter = 16)
 ```shell
 KEYS_COUNT=500 docker compose -f ./compose.bls.yml up
+```
+
+Or KDF Counter 2^14 = 16384, 
+```shell
+KEYS_COUNT=500 KDF_COUNTER=16384 docker compose -f ./compose.bls.yml up
 ```
 
 ---

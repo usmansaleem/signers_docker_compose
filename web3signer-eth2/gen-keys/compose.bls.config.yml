@@ -6,8 +6,12 @@ services:
       - keystores
       - --output
       - /var/config/keys
+      - --outputDirInConfig
+      - /var/config/keys
       - --count
       - "${KEYS_COUNT:-50}"
+      - --kdf-counter
+      - "${KDF_COUNTER:-16}"
     volumes:
       - ../web3signer/config/keys:/var/config/keys
 

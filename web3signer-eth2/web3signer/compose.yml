@@ -7,12 +7,37 @@ services:
     security_opt:
       - seccomp:unconfined  # Needed for profiling
     environment:
-      - JAVA_OPTS=-Xmx2G
+      - JAVA_OPTS=-Xmx3g
+        -Xms2g
+        -XX:+UseG1GC
+        -XX:MaxGCPauseMillis=200
+        -XX:G1HeapRegionSize=32m
+        -XX:G1ReservePercent=15
+        -XX:InitiatingHeapOccupancyPercent=45
+        -XX:+ParallelRefProcEnabled
+        -XX:ParallelGCThreads=2
+        -XX:ConcGCThreads=1
+        -XX:+UseStringDeduplication
+        -XX:MaxMetaspaceSize=384m
+        -XX:MetaspaceSize=256m
+        -XX:MaxDirectMemorySize=512m
+        -XX:+UseContainerSupport
+        -XX:ActiveProcessorCount=2
         -XX:+HeapDumpOnOutOfMemoryError
         -XX:HeapDumpPath=/heapdumps/web3signer_heapdump.hprof
-        -XX:+CrashOnOutOfMemoryError
         -XX:+ExitOnOutOfMemoryError
         -XX:NativeMemoryTracking=summary
+        -Xlog:gc*:file=/heapdumps/gc.log:time,uptime:filecount=5,filesize=10M
+        -XX:+AlwaysPreTouch
+        -Dio.netty.allocator.type=pooled
+        -Dio.netty.allocator.numDirectArenas=2
+        -Dio.netty.allocator.numHeapArenas=2
+        -Dio.netty.leakDetection.level=disabled
+        -Dio.netty.allocator.cacheTrimInterval=600000
+        -Djava.security.egd=file:/dev/urandom
+        -Dvertx.disableDnsResolver=true
+        -Dvertx.threadChecks=false
+        -Dvertx.disableContextTimings=true
         -Dcom.sun.management.jmxremote
         -Dcom.sun.management.jmxremote.port=9010
         -Dcom.sun.management.jmxremote.rmi.port=9010
@@ -47,7 +72,7 @@ services:
       context: .
       dockerfile: Dockerfile.sql-copier
       args:
-        WEB3SIGNER_TAG: ${WEB3SIGNER_TAG:-develop}  # Inherits from env
+        WEB3SIGNER_IMAGE: ${WEB3SIGNER_IMAGE:-consensys/web3signer:develop}  # Inherits from env
     container_name: 'ws-sql-scripts'
     user: "0:0"  # Run as root to ensure permissions
     networks:

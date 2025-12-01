@@ -1,6 +1,6 @@
 # Stage 1: Extract SQL files from web3signer
-ARG WEB3SIGNER_TAG=develop
-FROM consensys/web3signer:${WEB3SIGNER_TAG} AS sql-source
+ARG WEB3SIGNER_IMAGE=consensys/web3signer:develop
+FROM ${WEB3SIGNER_IMAGE} AS sql-source
 WORKDIR /sql-source
 RUN cp /opt/web3signer/migrations/postgresql/*.sql ./
 

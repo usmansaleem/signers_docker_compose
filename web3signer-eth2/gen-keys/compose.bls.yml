@@ -8,6 +8,8 @@ services:
       - /var/config/keystores
       - --count
       - "${KEYS_COUNT:-50}"
+      - --kdf-counter
+      - "${KDF_COUNTER:-16}"
       - --no-generate-config
     volumes:
       - ../web3signer/config/keystores:/var/config/keystores
