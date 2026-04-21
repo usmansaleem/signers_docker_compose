@@ -27,11 +27,12 @@ openssl req -x509 -newkey rsa:4096 -nodes -days 365 \
 
 echo "Generating truststore..."
 TRUSTSTORE_PASS=${TRUSTSTORE_PASSWORD:-test123}
-openssl pkcs12 -export -nokeys \
-  -in /certs/server.crt \
-  -out /certs/truststore.p12 \
-  -passout "pass:$TRUSTSTORE_PASS" \
-  -name vault -caname vault
+keytool -importcert -noprompt -trustcacerts \
+  -alias vault \
+  -file /certs/server.crt \
+  -keystore /certs/truststore.p12 \
+  -storetype PKCS12 \
+  -storepass "$TRUSTSTORE_PASS"
 
 echo "Generating knownhosts file..."
 echo "vault:8200 $(openssl x509 -in /certs/server.crt -noout -sha256 -fingerprint | awk -F= '{print $2}' | tr -d ': ')" > /certs/knownhosts
@@ -39,7 +40,7 @@ echo "vault:8200 $(openssl x509 -in /certs/server.crt -noout -sha256 -fingerprin
 # Set proper permissions
 chmod 644 /certs/server.crt
 chmod 600 /certs/server.key
-chmod 600 /certs/truststore.p12
+chmod 644 /certs/truststore.p12
 chmod 644 /certs/knownhosts
 
 # Copy to web3signer

@@ -1,6 +1,6 @@
 FROM alpine:latest
 
-RUN apk update && apk add --no-cache openssl && \
+RUN apk update && apk add --no-cache openssl openjdk21-jre-headless && \
     rm -rf /var/cache/apk/*
 
 COPY ./gen-cert.sh /usr/local/bin/gen-cert.sh
