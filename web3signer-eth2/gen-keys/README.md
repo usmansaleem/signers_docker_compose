@@ -65,7 +65,7 @@ Run `./scripts/clean.sh` to bring down every gen-keys compose stack and wipe its
 The `PROFILE` env var (default `vault-proxy`) is forwarded to `docker compose --profile`.
 
 To tear down the entire `web3signer-eth2` scenario (gen-keys + vault + web3signer), run
-`../scripts/clear-all.sh` instead — it calls this script for the gen-keys portion.
+`../scripts/clean-all.sh` instead — it calls this script for the gen-keys portion.
 
 Or manually run:
 ```shell

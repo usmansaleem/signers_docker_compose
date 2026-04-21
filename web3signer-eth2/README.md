@@ -88,7 +88,7 @@ docker exec ws-develop jcmd 1 GC.heap_dump /heapsumps/w3s_heapdump.hprof
 docker compose down
 
 # Full cleanup
-./scripts/clear-all.sh
+./scripts/clean-all.sh
 ```
 
 ---

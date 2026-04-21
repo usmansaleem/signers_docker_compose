@@ -81,7 +81,7 @@ log "pre-flight: ensuring docker network w3s_network exists"
 docker network inspect w3s_network >/dev/null 2>&1 || docker network create w3s_network
 
 log "pre-flight: clearing previous harness state"
-"$SCRIPT_DIR/clear-all.sh" >/dev/null 2>&1 || true
+"$SCRIPT_DIR/clean-all.sh" >/dev/null 2>&1 || true
 
 # 2. Start Web3Signer
 log "starting web3signer stack"

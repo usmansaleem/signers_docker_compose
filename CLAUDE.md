@@ -55,8 +55,12 @@ cd web3signer-eth2/web3signer && ./import_keystores.sh
 # Heap dump (profiling requires Linux host or Docker Desktop ≥ 4GB):
 docker exec ws-develop jcmd 1 GC.heap_dump /heapdumps/w3s_heapdump.hprof
 
-# Full teardown (brings down all three stacks and scrubs generated certs/creds/data/keys, preserving .gitignore files):
-./web3signer-eth2/scripts/clear-all.sh
+# Full teardown (delegates to per-service clean.sh scripts that bring down each stack and scrub generated certs/creds/data/keys, preserving .gitignore files):
+./web3signer-eth2/scripts/clean-all.sh
+# Or per-service, in isolation:
+./web3signer-eth2/gen-keys/scripts/clean.sh
+./web3signer-eth2/vault/scripts/clean.sh
+./web3signer-eth2/web3signer/scripts/clean.sh
 ```
 
 ### web3signer-eth1
@@ -134,7 +138,7 @@ Environment variables that shape behaviour: `WEB3SIGNER_IMAGE` (default `consens
 Changing tags in one file without the other will break key discovery. `localstack-volume/` persists LocalStack state between runs.
 
 ### Vault generated artifacts
-`web3signer-eth2/vault/` generates certs (`certs/`), root-token+unseal-key (`creds/`), and storage (`data/`) on first run — all gitignored. `clear-all.sh` is the canonical way to reset them; deleting `data/` alone leaves stale certs that will not match a newly initialized Vault.
+`web3signer-eth2/vault/` generates certs (`certs/`), root-token+unseal-key (`creds/`), and storage (`data/`) on first run — all gitignored. `vault/scripts/clean.sh` (or the top-level `scripts/clean-all.sh`) is the canonical way to reset them; deleting `data/` alone leaves stale certs that will not match a newly initialized Vault.
 
 ### Key generation utility
 `gen-keys/` uses pre-built images from https://github.com/usmansaleem/signer-configuration-generator. The four compose profiles are **mutually compatible** — you can mix (e.g., some keys bulkloaded, some via Vault yaml) because each writes to a different subdirectory under `web3signer/config/` (`keys/` vs `keystores/`).
