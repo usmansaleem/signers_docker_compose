@@ -56,7 +56,18 @@ KEYS_COUNT=500 docker compose -f ./compose.hashicorp.proxy.yml up
 ---
 
 ## Clean Up and Tear Down
-Either run `../scripts/clear-all.sh` that will stop and clean up everything, or manually run:
+
+Run `./scripts/clean.sh` to bring down every gen-keys compose stack and wipe its generated output
+(`keys/`, `keystores/`, and `knownhosts` under `../web3signer/config/`):
+```shell
+./scripts/clean.sh
+```
+The `PROFILE` env var (default `vault-proxy`) is forwarded to `docker compose --profile`.
+
+To tear down the entire `web3signer-eth2` scenario (gen-keys + vault + web3signer), run
+`../scripts/clear-all.sh` instead — it calls this script for the gen-keys portion.
+
+Or manually run:
 ```shell
 docker compose -f <compose-file> down --rmi all -v --remove-orphans
 ```
