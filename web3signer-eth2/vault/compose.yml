@@ -1,13 +1,12 @@
 services:
   vault-ssl-certificate:
-    image: alpine:latest
+    build:
+      context: ./gencert
     container_name: 'ws-vault-ssl-certificate'
     environment:
       - TRUSTSTORE_PASSWORD=${TRUSTSTORE_PASSWORD:-test123}
-    command: sh -c /scripts/gen-cert.sh
     volumes:
       - ./certs:/certs
-      - ./scripts:/scripts
       - ../web3signer/config:/web3signer/config
     healthcheck:
       test: [ "CMD-SHELL", "[ -f /certs/server.crt ] && [ -f /web3signer/config/knownhosts ]" ]
