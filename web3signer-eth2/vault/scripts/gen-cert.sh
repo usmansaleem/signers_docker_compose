@@ -19,8 +19,8 @@ cleanup() {
 }
 trap cleanup EXIT ERR
 
-echo "Installing openssl..."
-apk update && apk add openssl && rm -rf /var/cache/apk/*
+echo "Installing openssl and keytool..."
+apk update && apk add openssl openjdk21-jre-headless && rm -rf /var/cache/apk/*
 
 echo 'Generating SSL certificates...'
 openssl req -x509 -newkey rsa:4096 -nodes -days 365 \
@@ -30,9 +30,12 @@ openssl req -x509 -newkey rsa:4096 -nodes -days 365 \
 
 echo "Generating truststore..."
 TRUSTSTORE_PASS=${TRUSTSTORE_PASSWORD:-test123}
-openssl pkcs12 -export \
-  -in /certs/server.crt -inkey /certs/server.key \
-  -out /certs/truststore.p12 -passout pass:$TRUSTSTORE_PASS
+keytool -importcert -noprompt -trustcacerts \
+  -alias vault \
+  -file /certs/server.crt \
+  -keystore /certs/truststore.p12 \
+  -storetype PKCS12 \
+  -storepass $TRUSTSTORE_PASS
 
 echo "Generating knownhosts file..."
 echo "vault:8200 $(openssl x509 -in /certs/server.crt -noout -sha256 -fingerprint | awk -F= '{print $2}' | tr -d ': ')" > /certs/knownhosts

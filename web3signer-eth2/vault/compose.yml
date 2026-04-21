@@ -33,6 +33,7 @@ services:
     environment:
       - 'VAULT_SKIP_VERIFY=true'
       - 'VAULT_ENABLE_FILE_PERMISSIONS_CHECK=false'
+      - 'SKIP_SETCAP=true'
     healthcheck:
       test: ["CMD-SHELL", "curl -k --fail https://localhost:8200/v1/sys/health?sealedcode=200&uninitcode=200"]
       interval: 3s
