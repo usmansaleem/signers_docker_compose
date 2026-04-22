@@ -7,6 +7,13 @@ services:
     security_opt:
       - seccomp:unconfined  # Needed for profiling
     environment:
+      # JAVA_OPTS is consumed by the default image's shell launcher script.
+      # The distroless image (consensys/web3signer:<ver>-distroless) has no
+      # shell and invokes `java` directly, so it ignores JAVA_OPTS entirely.
+      # To pass the same JVM options to the distroless image, set either
+      # JDK_JAVA_OPTIONS (JDK 9+, read only by the `java` launcher) or
+      # JAVA_TOOL_OPTIONS (read by every JVM). Example:
+      #   - JDK_JAVA_OPTIONS=-Xmx3g -Xms2g -XX:+UseG1GC ...
       - JAVA_OPTS=-Xmx3g
         -Xms2g
         -Dlog4j.configurationFile=/var/config/log4j2.xml

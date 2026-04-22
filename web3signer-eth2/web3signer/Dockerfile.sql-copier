@@ -1,12 +1,13 @@
-# Stage 1: Extract SQL files from web3signer
+# Stage 1: Reference the Web3Signer image as a named build stage. We do not RUN
+# anything inside it — `COPY --from=sql-source` pulls the migration files straight
+# out of the image layers — so this Dockerfile works even when the Web3Signer
+# image has no shell (e.g. the distroless variant).
 ARG WEB3SIGNER_IMAGE=consensys/web3signer:develop
 FROM ${WEB3SIGNER_IMAGE} AS sql-source
-WORKDIR /sql-source
-RUN cp /opt/web3signer/migrations/postgresql/*.sql ./
 
-# Stage 2: Create minimal copier (5MB Alpine)
+# Stage 2: Minimal copier image containing only the Web3Signer SQL migration files.
 FROM alpine:3.18
-COPY --from=sql-source /sql-source/*.sql /sql-source/
+COPY --from=sql-source /opt/web3signer/migrations/postgresql/ /sql-source/
 
 # Validate files were copied during build
 RUN [ "$(ls -A /sql-source)" ] || (echo "Error: No SQL files found in build!" >&2 && exit 1)
