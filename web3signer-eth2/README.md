@@ -95,12 +95,35 @@ down the monitoring stack along with the rest.
 ---
 
 ## 5. Profiling (Optional)
-To generate Web3Signer's Java process heapdump from the host machine:
+
+The `ws-develop` image ships a JRE only, so `jcmd`/`jmap` aren't inside the
+container. Attach from a throwaway JDK sidecar that shares the signer's PID
+namespace — `jcmd 1` then targets the web3signer JVM:
 
 ```shell
-# Heap dump
-docker exec ws-develop jcmd 1 GC.heap_dump /heapsumps/w3s_heapdump.hprof
+# Sanity check that attach works
+docker run --rm --pid=container:ws-develop --cap-add=SYS_PTRACE --user root \
+  eclipse-temurin:25-jdk jcmd 1 VM.version
+
+# Force a Full GC (useful before reading retained-heap metrics in Grafana)
+docker run --rm --pid=container:ws-develop --cap-add=SYS_PTRACE --user root \
+  eclipse-temurin:25-jdk jcmd 1 GC.run
+
+# Class histogram — grep for e.g. BlsArtifactSigner, HashBiMap$BiEntry
+docker run --rm --pid=container:ws-develop --cap-add=SYS_PTRACE --user root \
+  eclipse-temurin:25-jdk jcmd 1 GC.class_histogram | head -40
+
+# Heap dump — JVM writes to ws-develop's /heapdumps (bind-mounted to ./heapdumps on host)
+docker run --rm --pid=container:ws-develop --cap-add=SYS_PTRACE --user root \
+  eclipse-temurin:25-jdk jcmd 1 GC.heap_dump /heapdumps/w3s_heapdump.hprof
 ```
+
+Notes:
+- `--cap-add=SYS_PTRACE` and `--user root` are required for the HotSpot attach
+  handshake across containers.
+- The heap-dump path is resolved inside the **target JVM's** filesystem, so the
+  `./heapdumps:/heapdumps` mount already declared in `web3signer/compose.yml`
+  delivers the file to the host without any extra sidecar mount.
 ## Clean up
 ```shell
 # From another terminal window
