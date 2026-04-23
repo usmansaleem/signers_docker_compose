@@ -75,7 +75,26 @@ be uploaded to `config/km/ks` directory or skip storage on disk depending on the
 
 ---
 
-## 4. Profiling (Optional)
+## 4. Monitoring (Optional)
+
+Bring up Prometheus + Grafana alongside a running Web3Signer. Both attach to the same `w3s_network` and
+Prometheus scrapes Web3Signer metrics from `ws-develop:9001`.
+
+```sh
+cd ./web3signer
+docker compose -f compose.monitoring.yml up -d
+```
+
+Access:
+- Grafana: http://localhost:3000 (anonymous `Viewer` enabled; login `admin` / `admin` for edit access)
+- Prometheus: http://localhost:9090
+
+The Web3Signer dashboard is auto-provisioned from `./monitoring/grafana/dashboards/`. `clean-all.sh` tears
+down the monitoring stack along with the rest.
+
+---
+
+## 5. Profiling (Optional)
 To generate Web3Signer's Java process heapdump from the host machine:
 
 ```shell
