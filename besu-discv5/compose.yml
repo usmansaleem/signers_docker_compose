@@ -1,0 +1,141 @@
+# Testing discovery v5 peer permissioning using docker compose
+#
+# node1 (172.28.0.10) — unrestricted, acts as bootnode for node2 and node3
+# node2 (172.28.0.20) — --net-restrict=172.28.0.0/28 (allows .1-.14 only)
+#                        → permits node1 (.10), rejects node3 (.30)
+# node3 (172.28.0.30) — unrestricted, uses node1 as bootnode
+#
+# Expected: node1 connects to both node2 and node3.
+#           node2 connects to node1 but rejects node3.
+#           node3 connects to node1 (and attempts node2, but node2 rejects it).
+
+services:
+  besu-node1:
+    image: hyperledger/besu:develop
+    container_name: besu-node1
+    networks:
+      besu-dual-net:
+        ipv4_address: 172.28.0.10
+        ipv6_address: fd00:dead:beef::10
+    ports:
+      - "30303:30303/tcp"
+      - "30303:30303/udp"
+      - "8545:8545"
+      - "8546:8546"
+    environment:
+      - LOG4J_CONFIGURATION_FILE=/var/lib/besu/custom-log4j.xml
+    volumes:
+      - besu-data1:/var/lib/besu
+      - ./custom-log4j.xml:/var/lib/besu/custom-log4j.xml:ro
+      - ./node1.key:/opt/besu/node.key:ro
+    # Uses built-in Dockerfile HEALTHCHECK: [ -f /tmp/pid ]
+    command:
+      - --network=dev
+      - --rpc-http-cors-origins=all
+      - "--host-allowlist=*"
+      - --rpc-ws-enabled
+      - --rpc-http-enabled
+      - --rpc-http-host=0.0.0.0
+      - --rpc-ws-host=0.0.0.0
+      - --data-path=/var/lib/besu
+      - --node-private-key-file=/opt/besu/node.key
+      - --Xv5-discovery-enabled=true
+      - "--p2p-host=172.28.0.10"
+      - "--p2p-interface=0.0.0.0"
+      - --p2p-port=30303
+      - --discovery-enabled=true
+      - --bootnodes
+
+  besu-node2:
+    image: hyperledger/besu:develop
+    container_name: besu-node2
+    depends_on:
+      besu-node1:
+        condition: service_healthy
+    networks:
+      besu-dual-net:
+        ipv4_address: 172.28.0.20
+        ipv6_address: fd00:dead:beef::20
+    ports:
+      - "30313:30303/tcp"
+      - "30313:30303/udp"
+      - "8547:8545"
+      - "8548:8546"
+    environment:
+      - LOG4J_CONFIGURATION_FILE=/var/lib/besu/custom-log4j.xml
+    volumes:
+      - besu-data2:/var/lib/besu
+      - ./custom-log4j.xml:/var/lib/besu/custom-log4j.xml:ro
+      - ./node2.key:/opt/besu/node.key:ro
+    command:
+      - --network=dev
+      - --rpc-http-cors-origins=all
+      - "--host-allowlist=*"
+      - --rpc-ws-enabled
+      - --rpc-http-enabled
+      - --rpc-http-host=0.0.0.0
+      - --rpc-ws-host=0.0.0.0
+      - --data-path=/var/lib/besu
+      - --node-private-key-file=/opt/besu/node.key
+      - --Xv5-discovery-enabled=true
+      - "--p2p-host=172.28.0.20"
+      - "--p2p-interface=0.0.0.0"
+      - --p2p-port=30303
+      - --discovery-enabled=true
+      - "--net-restrict=172.28.0.0/28"
+      - --bootnodes="enr:-Je4QDtoYVQQcfhPb6KF8lFk_5T3yiTnF-Qk-eKmas3l_s2yKWa2RLqQSdhSAdZ__W3_rOJGjvbVdiLpsVyuc3VS6kUBg2V0aMfGhMXIWLWAgmlkgnY0gmlwhKwcAAqJc2VjcDI1NmsxoQOxQXasSIFywVqmhA61NoVto58e_I-2fqLSQ1jTmS9wv4N0Y3CCdl-DdWRwgnZf"
+
+  besu-node3:
+    image: hyperledger/besu:develop
+    container_name: besu-node3
+    depends_on:
+      besu-node1:
+        condition: service_healthy
+    networks:
+      besu-dual-net:
+        ipv4_address: 172.28.0.30
+        ipv6_address: fd00:dead:beef::30
+    ports:
+      - "30323:30303/tcp"
+      - "30323:30303/udp"
+      - "8549:8545"
+      - "8550:8546"
+    environment:
+      - LOG4J_CONFIGURATION_FILE=/var/lib/besu/custom-log4j.xml
+    volumes:
+      - besu-data3:/var/lib/besu
+      - ./custom-log4j.xml:/var/lib/besu/custom-log4j.xml:ro
+      - ./node3.key:/opt/besu/node.key:ro
+    command:
+      - --network=dev
+      - --rpc-http-cors-origins=all
+      - "--host-allowlist=*"
+      - --rpc-ws-enabled
+      - --rpc-http-enabled
+      - --rpc-http-host=0.0.0.0
+      - --rpc-ws-host=0.0.0.0
+      - --data-path=/var/lib/besu
+      - --node-private-key-file=/opt/besu/node.key
+      - --Xv5-discovery-enabled=true
+      - "--p2p-host=172.28.0.30"
+      - "--p2p-interface=0.0.0.0"
+      - --p2p-port=30303
+      - --discovery-enabled=true
+      - --bootnodes="enr:-Je4QDtoYVQQcfhPb6KF8lFk_5T3yiTnF-Qk-eKmas3l_s2yKWa2RLqQSdhSAdZ__W3_rOJGjvbVdiLpsVyuc3VS6kUBg2V0aMfGhMXIWLWAgmlkgnY0gmlwhKwcAAqJc2VjcDI1NmsxoQOxQXasSIFywVqmhA61NoVto58e_I-2fqLSQ1jTmS9wv4N0Y3CCdl-DdWRwgnZf"
+
+networks:
+  besu-dual-net:
+    driver: bridge
+    enable_ipv6: true
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.0.0/24
+          gateway: 172.28.0.1
+        - subnet: fd00:dead:beef::/64
+          gateway: fd00:dead:beef::1
+
+volumes:
+  besu-data1:
+  besu-data2:
+  besu-data3:

@@ -10,7 +10,8 @@ Four independent scenarios, each with its own README:
 
 | Directory | Scenario |
 |---|---|
-| `besu/` | Besu JSON-RPC with TLS + mutual client auth (uses `docker-compose.yml`) |
+| `besu-tls-rpc/` | Besu JSON-RPC with TLS + mutual client auth (uses `docker-compose.yml`) |
+| `besu-discv5/` | Dual-stack (IPv4+IPv6) Besu discovery-v5. `compose.yml` (peer permissioning via `--net-restrict`) runs on `besu:develop`; `compose-ipv6-discovery.yml` (PR #10416 IPv6 auto-discovery, unmerged) needs a locally-built `besu:discv5develop` image. |
 | `web3signer-eth1/` | Web3Signer eth1 mode + LocalStack KMS (uses `compose.yaml`) |
 | `web3signer-eth2/` | Web3Signer eth2 mode + Hashicorp Vault + PostgreSQL/Flyway (multi-stack, see below) |
 | `web3signer-eip-4844/` | Web3Signer eth1 against a Kurtosis-launched Besu+Teku FULU network, driven by Python tests |
@@ -78,15 +79,25 @@ node testTypedData.js     # EIP-712 eth_signTypedData
 docker compose down --rmi all -v
 ```
 
-### besu (TLS test)
+### besu-tls-rpc (TLS test)
 ```sh
-cd besu && docker compose up
+cd besu-tls-rpc && docker compose up
 # Exercise mutual-TLS from another terminal:
 curl --cacert ./client1/besu.pem --cert-type P12 --cert ./client1/client1_keystore.p12:changeit \
   -X POST --data '{"jsonrpc":"2.0","method":"eth_chainId","params":[],"id":1}' \
   https://localhost:8545
 ```
-The besu README also contains the exact `keytool` sequence for regenerating the self-signed server/client certs and the `knownClients.txt` SHA-256 fingerprint.
+The besu-tls-rpc README also contains the exact `keytool` sequence for regenerating the self-signed server/client certs and the `knownClients.txt` SHA-256 fingerprint.
+
+### besu-discv5 (discovery-v5 dual-stack)
+```sh
+cd besu-discv5
+# Peer permissioning scenario (node2 has --net-restrict, should reject node3):
+docker compose up
+# IPv6 auto-discovery scenario (PR #10416):
+docker compose -f compose-ipv6-discovery.yml up
+```
+`compose.yml` runs on the public `hyperledger/besu:develop` image (PR #9950 — DiscV5 + `--net-restrict` — is already merged). `compose-ipv6-discovery.yml` needs a locally-built `hyperledger/besu:discv5develop` image (PR #10416 IPv6 auto-discovery is still in flight). Node keys (`node1.key`/`node2.key`/`node3.key`) are committed so ENRs are deterministic — throwaway test keys, do not reuse. RPC ports: node1 `8545`, node2 `8547`, node3 `8549`.
 
 ### web3signer-eip-4844
 Three moving parts in separate terminals:
