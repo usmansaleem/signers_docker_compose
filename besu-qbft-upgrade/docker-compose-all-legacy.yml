@@ -1,0 +1,142 @@
+# Phase 1 baseline: all 4 nodes on 25.12.0 (pre-blockAccessList)
+# Used as the starting point for the rolling upgrade test.
+#
+# Run: docker compose -f docker-compose-all-legacy.yml up -d
+
+x-besu-common: &besu-common
+  volumes:
+    - ./data/genesis.json:/opt/besu/genesis.json:ro
+  networks:
+    qbft-net:
+  restart: "no"
+
+services:
+  node-0:
+    <<: *besu-common
+    image: hyperledger/besu:25.12.0
+    container_name: qbft-upgrade-node-0
+    volumes:
+      - ./data/genesis.json:/opt/besu/genesis.json:ro
+      - ./data/node-0/key:/opt/besu/key:ro
+      - qbft-upgrade-node-0-data:/tmp/besu
+    networks:
+      qbft-net:
+        ipv4_address: 172.30.0.10
+    ports:
+      - "8545:8545"
+    command:
+      - --data-path=/tmp/besu
+      - --genesis-file=/opt/besu/genesis.json
+      - --node-private-key-file=/opt/besu/key
+      - --p2p-host=172.30.0.10
+      - --p2p-port=30303
+      - --rpc-http-enabled
+      - --rpc-http-host=0.0.0.0
+      - --rpc-http-api=ETH,NET,QBFT,WEB3
+      - --host-allowlist=*
+      - --min-gas-price=0
+      - --logging=INFO
+
+  node-1:
+    <<: *besu-common
+    image: hyperledger/besu:25.12.0
+    container_name: qbft-upgrade-node-1
+    volumes:
+      - ./data/genesis.json:/opt/besu/genesis.json:ro
+      - ./data/node-1/key:/opt/besu/key:ro
+      - qbft-upgrade-node-1-data:/tmp/besu
+    networks:
+      qbft-net:
+        ipv4_address: 172.30.0.11
+    ports:
+      - "8546:8545"
+    depends_on:
+      - node-0
+    command:
+      - --data-path=/tmp/besu
+      - --genesis-file=/opt/besu/genesis.json
+      - --node-private-key-file=/opt/besu/key
+      - --bootnodes=enode://${NODE0_PUBKEY}@172.30.0.10:30303
+      - --p2p-host=172.30.0.11
+      - --p2p-port=30303
+      - --rpc-http-enabled
+      - --rpc-http-host=0.0.0.0
+      - --rpc-http-api=ETH,NET,QBFT,WEB3
+      - --host-allowlist=*
+      - --min-gas-price=0
+      - --logging=INFO
+
+  node-2:
+    <<: *besu-common
+    image: hyperledger/besu:25.12.0
+    container_name: qbft-upgrade-node-2
+    volumes:
+      - ./data/genesis.json:/opt/besu/genesis.json:ro
+      - ./data/node-2/key:/opt/besu/key:ro
+      - qbft-upgrade-node-2-data:/tmp/besu
+    networks:
+      qbft-net:
+        ipv4_address: 172.30.0.12
+    ports:
+      - "8547:8545"
+    depends_on:
+      - node-0
+    command:
+      - --data-path=/tmp/besu
+      - --genesis-file=/opt/besu/genesis.json
+      - --node-private-key-file=/opt/besu/key
+      - --bootnodes=enode://${NODE0_PUBKEY}@172.30.0.10:30303
+      - --p2p-host=172.30.0.12
+      - --p2p-port=30303
+      - --rpc-http-enabled
+      - --rpc-http-host=0.0.0.0
+      - --rpc-http-api=ETH,NET,QBFT,WEB3
+      - --host-allowlist=*
+      - --min-gas-price=0
+      - --logging=INFO
+
+  node-3:
+    <<: *besu-common
+    image: hyperledger/besu:25.12.0
+    container_name: qbft-upgrade-node-3
+    volumes:
+      - ./data/genesis.json:/opt/besu/genesis.json:ro
+      - ./data/node-3/key:/opt/besu/key:ro
+      - qbft-upgrade-node-3-data:/tmp/besu
+    networks:
+      qbft-net:
+        ipv4_address: 172.30.0.13
+    ports:
+      - "8548:8545"
+    depends_on:
+      - node-0
+    command:
+      - --data-path=/tmp/besu
+      - --genesis-file=/opt/besu/genesis.json
+      - --node-private-key-file=/opt/besu/key
+      - --bootnodes=enode://${NODE0_PUBKEY}@172.30.0.10:30303
+      - --p2p-host=172.30.0.13
+      - --p2p-port=30303
+      - --rpc-http-enabled
+      - --rpc-http-host=0.0.0.0
+      - --rpc-http-api=ETH,NET,QBFT,WEB3
+      - --host-allowlist=*
+      - --min-gas-price=0
+      - --logging=INFO
+
+networks:
+  qbft-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.30.0.0/24
+
+volumes:
+  qbft-upgrade-node-0-data:
+    external: true
+  qbft-upgrade-node-1-data:
+    external: true
+  qbft-upgrade-node-2-data:
+    external: true
+  qbft-upgrade-node-3-data:
+    external: true

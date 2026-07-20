@@ -39,7 +39,6 @@ services:
       - --rpc-ws-host=0.0.0.0
       - --data-path=/var/lib/besu
       - --node-private-key-file=/opt/besu/node.key
-      - --Xv5-discovery-enabled=true
       - "--p2p-host=172.28.0.10"
       - "--p2p-interface=0.0.0.0"
       - --p2p-port=30303
@@ -77,7 +76,6 @@ services:
       - --rpc-ws-host=0.0.0.0
       - --data-path=/var/lib/besu
       - --node-private-key-file=/opt/besu/node.key
-      - --Xv5-discovery-enabled=true
       - "--p2p-host=172.28.0.20"
       - "--p2p-interface=0.0.0.0"
       - --p2p-port=30303
@@ -116,7 +114,6 @@ services:
       - --rpc-ws-host=0.0.0.0
       - --data-path=/var/lib/besu
       - --node-private-key-file=/opt/besu/node.key
-      - --Xv5-discovery-enabled=true
       - "--p2p-host=172.28.0.30"
       - "--p2p-interface=0.0.0.0"
       - --p2p-port=30303

@@ -45,7 +45,6 @@ services:
       - --rpc-http-api=ETH,NET,WEB3,ADMIN
       - --data-path=/var/lib/besu
       - --node-private-key-file=/opt/besu/node.key
-      - --Xv5-discovery-enabled=true
       - "--p2p-host=172.28.0.10"
       - "--p2p-host-ipv6=fd00:dead:beef::10"
       - "--p2p-interface=0.0.0.0"
@@ -86,7 +85,6 @@ services:
       - --rpc-http-api=ETH,NET,WEB3,ADMIN
       - --data-path=/var/lib/besu
       - --node-private-key-file=/opt/besu/node.key
-      - --Xv5-discovery-enabled=true
       - "--p2p-host=172.28.0.20"
       - "--p2p-interface=0.0.0.0"
       - "--p2p-interface-ipv6=::"
@@ -126,7 +124,6 @@ services:
       - --rpc-http-api=ETH,NET,WEB3,ADMIN
       - --data-path=/var/lib/besu
       - --node-private-key-file=/opt/besu/node.key
-      - --Xv5-discovery-enabled=true
       - "--p2p-host=172.28.0.30"
       - "--p2p-host-ipv6=fd00:dead:beef::30"
       - "--p2p-interface=0.0.0.0"

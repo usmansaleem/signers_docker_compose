@@ -1,0 +1,95 @@
+# Smoke-test overlay for discv5_metrics_followup branch
+#
+# Topology:
+#   node1 (172.28.0.10) — our branch build (bootnode), metrics on :9545
+#   node2 (172.28.0.20) — our branch build, ENR bootnode → V5 bootstrap, metrics on :9546
+#   node3 (172.28.0.30) — upstream hyperledger/besu:develop, enode bootnode → V4 bootstrap
+#
+# node2 talks V5 to node1; node3 talks V4 to node1.
+# Both V4 and V5 packets land on node1's shared socket → demux counter shows both labels.
+#
+# Usage:
+#   docker compose -f compose.yml -f compose.smoke-metrics.yml up -d
+#   sleep 60
+#   curl -s http://localhost:9545/metrics | grep -E 'discovery_demux|discv4_known|discv5_live|rlpx_outbound_connect'
+#   curl -s http://localhost:9546/metrics | grep -E 'discovery_demux|discv4_known|discv5_live|rlpx_outbound_connect'
+#   docker compose -f compose.yml -f compose.smoke-metrics.yml down -v
+
+services:
+  besu-node1:
+    image: hyperledger/besu:discv5metrics-develop
+    command:
+      - --network=dev
+      - --rpc-http-cors-origins=all
+      - "--host-allowlist=*"
+      - --rpc-ws-enabled
+      - --rpc-http-enabled
+      - --rpc-http-host=0.0.0.0
+      - --rpc-ws-host=0.0.0.0
+      - --data-path=/var/lib/besu
+      - --node-private-key-file=/opt/besu/node.key
+      - "--p2p-host=172.28.0.10"
+      - "--p2p-interface=0.0.0.0"
+      - --p2p-port=30303
+      - --discovery-enabled=true
+      - --bootnodes
+      - --metrics-enabled
+      - --metrics-host=0.0.0.0
+      - --metrics-port=9545
+    ports:
+      - "30303:30303/tcp"
+      - "30303:30303/udp"
+      - "8545:8545"
+      - "8546:8546"
+      - "9545:9545"
+
+  besu-node2:
+    image: hyperledger/besu:discv5metrics-develop
+    command:
+      - --network=dev
+      - --rpc-http-cors-origins=all
+      - "--host-allowlist=*"
+      - --rpc-ws-enabled
+      - --rpc-http-enabled
+      - --rpc-http-host=0.0.0.0
+      - --rpc-ws-host=0.0.0.0
+      - --data-path=/var/lib/besu
+      - --node-private-key-file=/opt/besu/node.key
+      - "--p2p-host=172.28.0.20"
+      - "--p2p-interface=0.0.0.0"
+      - --p2p-port=30303
+      - --discovery-enabled=true
+      - "--net-restrict=172.28.0.0/28"
+      - "--bootnodes=enr:-Je4QDtoYVQQcfhPb6KF8lFk_5T3yiTnF-Qk-eKmas3l_s2yKWa2RLqQSdhSAdZ__W3_rOJGjvbVdiLpsVyuc3VS6kUBg2V0aMfGhMXIWLWAgmlkgnY0gmlwhKwcAAqJc2VjcDI1NmsxoQOxQXasSIFywVqmhA61NoVto58e_I-2fqLSQ1jTmS9wv4N0Y3CCdl-DdWRwgnZf"
+      - --metrics-enabled
+      - --metrics-host=0.0.0.0
+      - --metrics-port=9545
+    ports:
+      - "30313:30303/tcp"
+      - "30313:30303/udp"
+      - "8547:8545"
+      - "8548:8546"
+      - "9546:9545"
+
+  besu-node3:
+    image: hyperledger/besu:develop
+    command:
+      - --network=dev
+      - --rpc-http-cors-origins=all
+      - "--host-allowlist=*"
+      - --rpc-ws-enabled
+      - --rpc-http-enabled
+      - --rpc-http-host=0.0.0.0
+      - --rpc-ws-host=0.0.0.0
+      - --data-path=/var/lib/besu
+      - --node-private-key-file=/opt/besu/node.key
+      - "--p2p-host=172.28.0.30"
+      - "--p2p-interface=0.0.0.0"
+      - --p2p-port=30303
+      - --discovery-enabled=true
+      - "--bootnodes=enode://b14176ac488172c15aa6840eb536856da39f1efc8fb67ea2d24358d3992f70bf64ee7b97443a63fb40e73aa72adb0c10d4483c82ea0f8a6c5c95cb4522c1d63d@172.28.0.10:30303"
+    ports:
+      - "30323:30303/tcp"
+      - "30323:30303/udp"
+      - "8549:8545"
+      - "8550:8546"

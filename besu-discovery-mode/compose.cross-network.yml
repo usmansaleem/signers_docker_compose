@@ -1,0 +1,164 @@
+# Cross-network topology: three nodes on three separate docker networks, each representing a
+# different "public interface" configuration a real deployment might have:
+#
+# node-a (net-ipv6-only): single-stack IPv6-only  (--p2p-interface=::)
+# node-b (net-ipv4-only): single-stack IPv4-only  (--p2p-interface=0.0.0.0, the common case)
+# node-c (both networks): dual-stack hub          (--p2p-interface=0.0.0.0 --p2p-interface-ipv6=::)
+#
+# node-c is the only node attached to both networks, so it's the only one that CAN reach both
+# node-a and node-b directly - node-a and node-b have no common address family and cannot reach
+# each other, by design (this isn't a bug to fix, it's the physical reality being modeled).
+#
+# All three run --discovery-mode=V4 with explicit enode:// bootnodes (not ENR), so every
+# bootstrap target's address family is unambiguous - no reliance on a peer picking the "right"
+# field out of a multi-address ENR.
+#
+# Expected:
+#   - node-a <-> node-c bond over IPv6 (admin_peers: 1 peer each)
+#   - node-b <-> node-c bond over IPv4 (admin_peers: 1 peer each)
+#   - node-c has 2 peers (one IPv6, one IPv4)
+#   - node-a and node-b do NOT appear in each other's admin_peers
+#   - no WARN/ERROR spam on any node, even if node-a or node-b's DiscV4 routing table ever
+#     learns of the other (via node-c's NEIGHBORS gossip) and attempts to bond - the resulting
+#     cross-family send fails as a quietly-traced UnsupportedAddressTypeException, not a warning
+#     (see NettyTransport.send() / NettyPeerDiscoveryAgent.handleOutgoingPacketError)
+#
+# node-c's IPv6 discovery/RLPx port is 30404, not 30303 - dual-stack secondary interfaces
+# default to (--p2p-port + 101) unless --p2p-port-ipv6 is set explicitly. This is NOT true for
+# node-a, whose IPv6 interface is primary (single-stack), so it uses --p2p-port=30303 directly.
+#
+# Usage:
+#   docker compose -f compose.cross-network.yml up
+#   curl -s -X POST -H "Content-Type: application/json" \
+#     --data '{"jsonrpc":"2.0","method":"admin_peers","params":[],"id":1}' \
+#     http://localhost:8600 | jq   # node-c (hub) - expect 2 peers
+#   docker compose -f compose.cross-network.yml down -v
+
+services:
+  besu-node-a:
+    image: hyperledger/besu:sharedtransport-develop
+    container_name: discmode-xnet-node-a
+    networks:
+      net-ipv6-only:
+        ipv6_address: fd00:beef:dead::10
+    ports:
+      - "8601:8545"
+    environment:
+      - LOG4J_CONFIGURATION_FILE=/var/lib/besu/custom-log4j.xml
+    volumes:
+      - besu-data-a:/var/lib/besu
+      - ./custom-log4j.xml:/var/lib/besu/custom-log4j.xml:ro
+      - ./node1.key:/opt/besu/node.key:ro
+    # Uses built-in Dockerfile HEALTHCHECK: [ -f /tmp/pid ]
+    command:
+      - --network=dev
+      - --rpc-http-cors-origins=all
+      - "--host-allowlist=*"
+      - --rpc-http-enabled
+      - --rpc-http-host=0.0.0.0
+      - --rpc-http-api=ETH,NET,WEB3,ADMIN
+      - --data-path=/var/lib/besu
+      - --node-private-key-file=/opt/besu/node.key
+      - --discovery-mode=V4
+      - "--p2p-host=fd00:beef:dead::10"
+      - "--p2p-interface=::"
+      - --p2p-port=30303
+      - --discovery-enabled=true
+      # node-c's IPv6-side enode (port 30404 - see header comment) - deterministic from
+      # node3.key + fd00:beef:dead::30 / dual-stack config below (verified against this image).
+      - --bootnodes=enode://99f8215e59bb65a11d6748c2d00fcad0e5a4c71a0a71dc26629dda0516a3d4b66f8e99361734c9a59fb1bdadbb743201132761678c407b702fa9641db558f36e@[fd00:beef:dead::30]:30404
+    depends_on:
+      besu-node-c:
+        condition: service_healthy
+
+  besu-node-b:
+    image: hyperledger/besu:sharedtransport-develop
+    container_name: discmode-xnet-node-b
+    networks:
+      net-ipv4-only:
+        ipv4_address: 172.29.0.10
+    ports:
+      - "8602:8545"
+    environment:
+      - LOG4J_CONFIGURATION_FILE=/var/lib/besu/custom-log4j.xml
+    volumes:
+      - besu-data-b:/var/lib/besu
+      - ./custom-log4j.xml:/var/lib/besu/custom-log4j.xml:ro
+      - ./node2.key:/opt/besu/node.key:ro
+    command:
+      - --network=dev
+      - --rpc-http-cors-origins=all
+      - "--host-allowlist=*"
+      - --rpc-http-enabled
+      - --rpc-http-host=0.0.0.0
+      - --rpc-http-api=ETH,NET,WEB3,ADMIN
+      - --data-path=/var/lib/besu
+      - --node-private-key-file=/opt/besu/node.key
+      - --discovery-mode=V4
+      - "--p2p-host=172.29.0.10"
+      - "--p2p-interface=0.0.0.0"
+      - --p2p-port=30303
+      - --discovery-enabled=true
+      # node-c's IPv4-side enode (port 30303) - deterministic from node3.key + 172.29.0.30
+      # (verified against this image).
+      - --bootnodes=enode://99f8215e59bb65a11d6748c2d00fcad0e5a4c71a0a71dc26629dda0516a3d4b66f8e99361734c9a59fb1bdadbb743201132761678c407b702fa9641db558f36e@172.29.0.30:30303
+    depends_on:
+      besu-node-c:
+        condition: service_healthy
+
+  besu-node-c:
+    image: hyperledger/besu:sharedtransport-develop
+    container_name: discmode-xnet-node-c
+    networks:
+      net-ipv4-only:
+        ipv4_address: 172.29.0.30
+      net-ipv6-only:
+        ipv6_address: fd00:beef:dead::30
+    ports:
+      - "8600:8545"
+    environment:
+      - LOG4J_CONFIGURATION_FILE=/var/lib/besu/custom-log4j.xml
+    volumes:
+      - besu-data-c:/var/lib/besu
+      - ./custom-log4j.xml:/var/lib/besu/custom-log4j.xml:ro
+      - ./node3.key:/opt/besu/node.key:ro
+    # Uses built-in Dockerfile HEALTHCHECK: [ -f /tmp/pid ]
+    command:
+      - --network=dev
+      - --rpc-http-cors-origins=all
+      - "--host-allowlist=*"
+      - --rpc-http-enabled
+      - --rpc-http-host=0.0.0.0
+      - --rpc-http-api=ETH,NET,WEB3,ADMIN
+      - --data-path=/var/lib/besu
+      - --node-private-key-file=/opt/besu/node.key
+      - --discovery-mode=V4
+      - "--p2p-host=172.29.0.30"
+      - "--p2p-host-ipv6=fd00:beef:dead::30"
+      - "--p2p-interface=0.0.0.0"
+      - "--p2p-interface-ipv6=::"
+      - --p2p-port=30303
+      - --discovery-enabled=true
+      - --bootnodes
+
+networks:
+  net-ipv6-only:
+    driver: bridge
+    enable_ipv6: true
+    ipam:
+      driver: default
+      config:
+        - subnet: fd00:beef:dead::/64
+          gateway: fd00:beef:dead::1
+  net-ipv4-only:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.29.0.0/24
+          gateway: 172.29.0.1
+
+volumes:
+  besu-data-a:
+  besu-data-b:
+  besu-data-c:

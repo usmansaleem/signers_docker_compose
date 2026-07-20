@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Properties>
+        <!-- Root/package-level stays quiet; only the specific classes below get TRACE, so you
+             get wire-level PING/PONG/handshake/demux signal without the discovery package's
+             general TRACE noise (RLP-decode traces, per-tick bonding-round skips, etc.) -->
+        <Property name="root.level">INFO</Property>
+        <Property name="pattern">%d{yyyy-MM-dd HH:mm:ss.SSSZZZ} | %t | %highlight{%-5level} | %c{1} | %msg%n</Property>
+    </Properties>
+
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout disableAnsi="false" pattern="${pattern}"/>
+        </Console>
+    </Appenders>
+
+    <Loggers>
+        <!-- DiscV4 wire-level packet trace: logs every PING/PONG/FIND_NEIGHBORS/NEIGHBORS
+             sent and received, with the full decoded packet contents. -->
+        <Logger name="org.hyperledger.besu.ethereum.p2p.discovery.discv4.internal.DiscoveryProtocolLogger"
+                level="TRACE" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <!-- Shared-socket demux classification. NOTE: as of this branch, this handler only logs
+             its *drop* paths (too-small / oversized-V4 / unrecognized packet) — there is no log
+             line for successful routing. Absence of "Dropping unrecognized packet" here, taken
+             together with the V4/V5 protocol loggers below actually showing traffic, is the proof
+             that demux is classifying packets correctly (a packet cannot reach either protocol's
+             handler without passing through this class first). -->
+        <Logger name="org.hyperledger.besu.ethereum.p2p.discovery.transport.SharedDiscoveryDemuxHandler"
+                level="TRACE" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <!-- DiscV5 wire-level packet trace, from the discv5 library:
+             WhoAreYouPacketHandler   — handshake challenge (WHOAREYOU) issue/receipt
+             HandshakeMessagePacketHandler — handshake completion (encrypted first message)
+             MessagePacketHandler     — post-handshake messages (FINDNODE/NODES/PING/PONG) -->
+        <Logger name="org.ethereum.beacon.discovery.pipeline.handler.WhoAreYouPacketHandler"
+                level="TRACE" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        <Logger name="org.ethereum.beacon.discovery.pipeline.handler.HandshakeMessagePacketHandler"
+                level="TRACE" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        <Logger name="org.ethereum.beacon.discovery.pipeline.handler.MessagePacketHandler"
+                level="TRACE" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <!-- Discovery-mode resolution, composite start/stop, bonding lifecycle at DEBUG —
+             enough to see "Peer discovery mode: ..." / "Starting discovery on shared UDP socket
+             (...)" and bonding state changes, without the full package's TRACE volume. -->
+        <Logger name="org.hyperledger.besu.ethereum.p2p.discovery" level="DEBUG" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <!-- Everything else at INFO to console -->
+        <Root level="${root.level}">
+            <AppenderRef ref="Console"/>
+        </Root>
+    </Loggers>
+</Configuration>

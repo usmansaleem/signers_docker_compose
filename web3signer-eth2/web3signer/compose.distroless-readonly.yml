@@ -1,0 +1,38 @@
+# Standalone compose file for reproducing / verifying issue #1199:
+#   "distroless image fails to import keys via Key Manager API under --read-only"
+#
+# Uses config-km.yaml which already has:
+#   eth2.Xkey-manager-skip-keystore-storage: true  → InMemoryValidatorManager,
+#     no keystore files written to disk (BLSSecretKey.fromBytes still runs)
+#   eth2.keystores-passwords-path (dir)  → loadKeystoresUsingPasswordDir,
+#     handles empty dir without NPE
+#
+# /tmp is intentionally NOT mounted as tmpfs: the distroless image must not
+# need it (libblst.so is pre-extracted to /opt/web3signer/native-libs at
+# build time).  If it does try to write there the container will fail.
+#
+# Reproduce the bug (26.4.1, pre-fix):
+#   WEB3SIGNER_IMAGE=consensys/web3signer:26.4.1-distroless \
+#     docker compose -f compose.distroless-readonly.yml up -d
+#   ./import_keystores.sh ./config/keystores
+#   # Expected: BlstLoader error in logs, "status":"error" in response
+#
+# Confirm the fix (26.4.2+):
+#   WEB3SIGNER_IMAGE=consensys/web3signer:26.4.2-distroless \
+#     docker compose -f compose.distroless-readonly.yml up -d
+#   ./import_keystores.sh ./config/keystores
+#   # Expected: {"data":[{"status":"imported"}]}
+
+services:
+  web3signer:
+    image: ${WEB3SIGNER_IMAGE:-consensys/web3signer:develop-distroless}
+    container_name: 'ws-distroless-readonly'
+    read_only: true
+    volumes:
+      - ./config:/var/config:ro
+    command:
+      - --config-file=/var/config/config-km.yaml
+      - eth2
+      - --slashing-protection-enabled=false
+    ports:
+      - "9000:9000"
