@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Properties>
+        <!-- Root console level remains INFO so you don't flood stdout -->
+        <Property name="root.level">DEBUG</Property>
+        <Property name="custom.level">TRACE</Property>
+        <Property name="pattern">%d{yyyy-MM-dd HH:mm:ss.SSSZZZ} | %t | %highlight{%-5level} | %c{1} | %msg%n</Property>
+    </Properties>
+
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout disableAnsi="false" pattern="${pattern}"/>
+        </Console>
+
+    </Appenders>
+
+    <Loggers>
+        <Logger name="org.hyperledger.besu.ethereum.p2p.discovery" level="TRACE" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        <Logger name="org.ethereum.beacon.discovery" level="TRACE" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        <!-- Everything else at INFO to console -->
+        <Root level="${root.level}">
+            <AppenderRef ref="Console"/>
+        </Root>
+    </Loggers>
+</Configuration>
